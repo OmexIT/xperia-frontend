@@ -1,0 +1,50 @@
+<div class="col-md-12" ng-controller="SmsCampaignController">
+    <ul class="globalnav">
+        <li><a href ng-click="" class="here">Campaign</a></li>
+        <li><a href ng-click="">Pending SMS</a></li>
+        <li><a href ng-click="">Sent SMS</a></li>
+        <li><a href ng-click="">Delivered SMS</a></li>
+        <li><a href ng-click="">Failed SMS</a></li>
+    </ul>
+
+    <div class="campaign-body">
+        <h1>SMS Campaign</h1>
+        <div class="pull-right">
+            <a href="#/createsmscampaign" class="btn btn-primary pull-right" has-permission='CREATE_CLIENT'>
+                <i class="icon-plus icon-white"></i>&nbsp;Create SMS Campaign</a>
+        </div>
+        <div class="campaign-table">
+            <table>
+                <thead>
+                <tr>
+                    <th>Campaign Name</th>
+                    <th>Type</th>
+                    <th>Message Template</th>
+                    <th>Submitted By</th>
+                    <th>Campaign Type</th>
+                    <th>Approved By</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr class="pointer-main"
+                    dir-paginate="client in clients | orderBy:'displayName':reverse  | filter:filterText | itemsPerPage: clientsPerPage"
+                    total-items="totalClients">
+                    <td class="pointer" data-ng-click="routeTo(client.id)">{{client.displayName}}</td>
+                    <td class="pointer" data-ng-click="routeTo(client.id)">{{client.accountNo}}</td>
+                    <td class="pointer" data-ng-click="routeTo(client.id)">{{client.externalId}}</td>
+                    <td class="pointer" data-ng-click="routeTo(client.id)">
+                        <i class="icon-stop {{client.status.code | StatusLookup}}"></i>&nbsp;{{client.status.value}}
+                        <small ng-if="client.subStatus.description">[{{client.subStatus.description}}]</small>
+                    </td>
+                    <td class="pointer" data-ng-click="routeTo(client.id)">{{client.officeName}}</td>
+                    <td class="pointer" data-ng-click="routeTo(client.id)">{{client.staffName}}</td>
+                </tr>
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,102 @@
+<div class="col-md-12" ng-controller="mpesareconciliationController">
+    <ul class="breadcrumb">
+		<li><a href="#/organization">{{'label.anchor.organization' | translate}}</a></li>
+        <li class="active"><a href="#/mobilemoney">{{'label.mpesa.view'|translate}}</a></li>
+    </ul>
+    <ul></ul>
+    <script type="text/ng-template" id="showTxn.html">
+        <div class="modal-header silver">
+            <h3 class="bolder">{{'label.view.mpesa Transaction Summary'|translate}}</h3>
+        </div>
+        <div class="modal-body">
+            <api-validate></api-validate>
+            <table class="table">
+                <thead>
+                <tr class ="graybg">
+                    <th>{{'label.mpesa.clientName'|translate}}</th><th>{{'label.mpesa.Account No'|translate}}</th><th>{{'label.mpesa.Charge Amount'|translate}}</th><th>{{'label.mpesa.Transaction Date'|translate}}</th><th>{{'label.mpesa.Amount'|translate}}</th></tr></thead><tbody>
+            <tr ng-repeat="transaction in transactionData">
+                <td>{{transaction.clientName}}</td><td>{{transaction.accountNo}}</td><td>{{transaction.Amount}}</td>
+                <td>{{transaction.TxnDate}}</td><td>{{transaction.chargeAmount}}</td>
+            </tr>
+            </tbody>
+            </table>
+            <br>
+            <button class="btn btn-warning" ng-click="cancel()">Close</button>
+        </div>
+    </script>
+    <div>
+        <form name="search">
+            <table>
+                <tr>
+                    <td colspan="2">{{'label.mpesa.Mobile No'|translate}}&nbsp;&nbsp;&nbsp;&nbsp;</td><td><input type="text" id="mobileNo" name="mobileNo" ng-model="mobileNosearch"
+                                                                                                                 ng-pattern="/^[0-9]+$/"  class="form-control"/></td>
+
+
+                    <td>&nbsp;&nbsp;{{'label.mpesa.From Date'|translate}}&nbsp;&nbsp;</td><td><input id="From Date" type="text" name="From Date" datepicker-pop="dd MMMM yyyy"
+                                                                                                     ng-model="fromDateSearch" is-open="opened" min="'2000-01-01'" max="restrictDate"  class="form-control/"></td>
+                    <td>&nbsp;&nbsp;{{'label.mpesa.to Date'|translate}} &nbsp;&nbsp;</td><td><input id="To Date" type="text" name="From Date" datepicker-pop="dd MMMM yyyy"
+                                                                                                    ng-model="toDateSearch" is-open="opened" min="'2000-01-01'" max="restrictDate"  class="form-control/"></td>
+                    <td>
+                        &nbsp;&nbsp;&nbsp;&nbsp;{{'label.mpesa.Status'|translate}}
+                    </td>
+                    <td>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <select   chosen="searchStatus"  ng-init="formData.searchStatus1 = searchStatus[p]" ng-model="formData.searchStatus1"  class="form-control"
+                                  ng-options="searchStatus1.id as searchStatus1.name for searchStatus1 in searchStatus track by searchStatus1.id" value="{{searchStatus1.id}}">
+                            <option value=""></option>
+
+                        </select>
+
+                    </td>
+                </tr>
+            </table>
+	<p></p>
+    <div class="pull-right">
+			<div class="btn-group">
+			<button id="cancle" type="reset" align="middle" class="btn btn-danger" ng-click="cancel()">{{ 'label.button.reset' | translate}}</button>
+			<button id="submit" type="submit"  class="btn btn-primary" ng-click="Mpesasearch()">{{ 'label.button.save' | translate}}</button>
+			<a id="cancel" class="btn btn-default" href="#/organization">{{'label.button.cancel' | translate}}</a>
+		</div>
+	</div>
+	<legend class="ng-binding"></legend>
+        </form>
+
+    </div>
+    <ul></ul>
+    <div ng-show="Paidstatus==false">
+        <table class="table">
+            <thead>
+            <tr class="graybg">
+                <th>{{'label.mpesa.Transaction Date'|translate}}</th>
+                <th>{{'label.mpesa.Transaction Code'|translate}}</th>
+                <th>{{'label.mpesa.Client'|translate}}</th>
+                <th>{{'label.mpesa.Mobile No'|translate}}</th>
+                <th>{{'label.mpesa.Transaction Details'|translate}}</th>
+                <th></th>
+                <th></th>
+                <th>{{'label.mpesa.Amount'|translate}}</th>
+                <th>{{'label.mpesa.Status'|translate}}</th>
+                <th>{{'label.mpesa.Pay'|translate}}</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="transactions in completetransaction" ng-if="transactions.type!='WithDraw'">
+                <td>{{transactions.transactionTime}}</td>
+                <td>{{transactions.transactionCode}}</td>
+                <td>{{transactions.clientName}}-{{transactions.clientId}}</td>
+                <td>{{transactions.mobileNo}}</td>
+                <td  colspan="3" >{{transactions.testMessage}}</td>
+                <td>{{transactions.transactionAmount}}</td>
+                <td>{{transactions.status}}
+                <td>
+                    <a title="Pay" ng-if="transactions.status!='PAID'&& transactions.status!='UNMP'"
+                       ng-click="routeTo(transactions.clientId,transactions.transactionAmount,transactions.transactionCode,transactions.transactionDate,transactions.id)" ><i
+                            class="icon-check icon-white"></i></a>
+                    <a title="show Transaction Details" ng-if="transactions.status=='PAID'" ng-click="showTransactionDetail1(transactions.clientId,transactions.transactionDate,transactions.transactionCode)">&nbsp;<i class="fa fa-hand-o-right"></i></a>
+                    <a title="Pay" ng-if ="transactions.status=='UNMP'"
+                       ng-click="redirectTo(transactions.transactionAmount,transactions.transactionCode,transactions.transactionDate,transactions.id,transactions.sender,transactions.mobileNo)" ><i
+                            class="icon-check icon-white"></i></a>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

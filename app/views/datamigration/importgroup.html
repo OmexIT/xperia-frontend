@@ -1,0 +1,51 @@
+<div class="col-md-12">
+    <ul class="breadcrumb">
+        <li><a href="#/groups">{{'label.anchor.groups' | translate}}</a></li>
+        <li class="active">Import Groups</li>
+    </ul>
+    <div name="ImportGroup" ng-controller="ImportGroupController">
+    
+    	<!-- TODO -->
+    	<!-- Client input validation -->
+	    <form name="getTemplateForm" novalidate="" class="form-horizontal well" rc-submit="getGroupTemplate()">
+		    <api-validate></api-validate>
+		    <fieldset>
+		        <legend>Get Template</legend>
+		        <div class="form-group">
+		            
+		        </div>
+		        <div class="col-md-offset-3">
+		            <button id="btnGetTemplate" type="submit" class="btn btn-primary" has-permission='CREATE_GROUP'>Get Template</button>
+		        </div>
+		    </fieldset>
+		</form>
+		
+		<form name="importGroupForm" novalidate="" class="form-horizontal well" rc-submit="importGroups()">
+		    <api-validate></api-validate>
+		    <fieldset>
+		        <legend>Import Groups</legend>
+		        <div class="form-group">
+				
+					<br>
+					
+		            <label class="control-label col-sm-3">Select the Excel File<span class="required">*</span></label>
+		
+		            <div class="col-sm-4">
+		                <input class="form-control" type="file" name="inputExcelFile" ng-file-select="onFileSelect($files)" required ></input>
+		            </div>
+		            
+		        </div>
+		        <div class="col-md-offset-3">
+		            <button id="btnGetTemplate" type="submit" class="btn btn-primary" has-permission='CREATE_GROUP'>Submit Excel File</button>
+		        </div>
+		    </fieldset>
+		</form>
+
+		<div class="col-md-offset-3">
+			<a id="cancel" href="#/groups">
+				<button type="reset" class="btn btn-default">{{'label.button.cancel'| translate}}</button>
+			</a>
+		</div>
+
+	</div>
+</div>

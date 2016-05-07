@@ -1,0 +1,90 @@
+<div class="col-md-12">
+	<ul class="breadcrumb">
+		<li><a href="#/codes">Codes</a></li>
+		<li class="active">Import Codes</li>
+	</ul>
+	<div name="ImportLoan" ng-controller="ImportCodeController">
+
+		<form name="getCodeTemplateForm" novalidate="" class="form-horizontal well" rc-submit="getCodeTemplate()">
+		    <api-validate></api-validate>
+		    <fieldset>
+		        <legend>Get Code Template</legend>
+				
+		        <div class="form-group">
+		            
+		        </div>
+		        <div class="col-md-offset-3">
+		            <button id="btnGetTemplate" type="submit" class="btn btn-primary" has-permission='CREATE_CODE'>Get Template</button>
+		        </div>
+		    </fieldset>
+		</form>
+
+		<form name="importCodeForm" novalidate="" class="form-horizontal well" rc-submit="importCodes()">
+			<api-validate></api-validate>
+			<fieldset>
+				<legend>Import Codes</legend>
+				<div class="form-group">
+
+					<br> <label class="control-label col-sm-3">Select the
+						Excel File<span class="required">*</span>
+					</label>
+
+					<div class="col-sm-4">
+						<input class="form-control" type="file" name="inputExcelFile"
+							ng-file-select="onFileSelect($files)" required></input>
+					</div>
+
+				</div>
+				<div class="col-md-offset-3">
+					<button id="btnGetTemplate" type="submit" class="btn btn-primary"
+						has-permission='CREATE_CODE'>Submit Excel File</button>
+				</div>
+			</fieldset>
+		</form>
+		
+		<form name="getTemplateCodeValuesForm" novalidate="" class="form-horizontal well" rc-submit="getCodeValueTemplate()">
+		    <api-validate></api-validate>
+		    <fieldset>
+		        <legend>Get Code Value Template</legend>
+				<h3>Enter your Codes before entering code values!<h3>
+		        <div class="form-group">
+		            
+		        </div>
+		        <div class="col-md-offset-3">
+		            <button id="btnGetTemplate" type="submit" class="btn btn-primary" has-permission='CREATE_CODE'>Get Template</button>
+		        </div>
+		    </fieldset>
+		</form>
+
+		<form name="importCodeValuesForm" novalidate="" class="form-horizontal well" rc-submit="importCodeValues()">
+			<api-validate></api-validate>
+			<fieldset>
+				<legend>Import Code Values</legend>
+				<div class="form-group">
+
+					<br> <label class="control-label col-sm-3">Select the
+						Excel File<span class="required">*</span>
+					</label>
+
+					<div class="col-sm-4">
+						<input class="form-control" type="file" name="inputExcelFile"
+							ng-file-select="onFileSelect($files)" required></input>
+					</div>
+
+				</div>
+				<div class="col-md-offset-3">
+					<button id="btnGetTemplate" type="submit" class="btn btn-primary"
+						has-permission='CREATE_CODE'>Submit Excel File</button>
+				</div>
+			</fieldset>
+		</form>
+
+		<div class="col-md-offset-3">
+			<a id="cancel" href="#/codes">
+				<button type="reset" class="btn btn-default">{{'label.button.cancel'|
+					translate}}</button>
+			</a>
+		</div>
+
+	</div>
+</div>

@@ -1,0 +1,94 @@
+<div class="col-md-12">
+	<ul class="breadcrumb">
+		<li><a href="#/home">Home</a></li>
+		<li class="active">Import Loans</li>
+	</ul>
+	<div name="ImportLoan" ng-controller="ImportLoanController">
+
+		<form name="getTemplateForm" novalidate="" class="form-horizontal well" rc-submit="getLoanTemplate()">
+		    <api-validate></api-validate>
+		    <fieldset>
+		        <legend>Get Template</legend>
+				
+				<h3>Enter your Currency Configuration, Funds, Charges, Loan Product configuration (Admin -> Organisation) <br>
+				and Payment Types (Administration -> System -> View Code ->Add/Edit Code Value)!<h3>
+		        <div class="form-group">
+		            
+		        </div>
+		        <div class="col-md-offset-3">
+		            <button id="btnGetTemplate" type="submit" class="btn btn-primary" has-permission='CREATE_LOAN'>Get Template</button>
+		        </div>
+		    </fieldset>
+		</form>
+
+		<form name="importLoanForm" novalidate=""
+			class="form-horizontal well" rc-submit="importLoans()">
+			<api-validate></api-validate>
+			<fieldset>
+				<legend>Import Loans</legend>
+				<div class="form-group">
+
+					<br> <label class="control-label col-sm-3">Select the
+						Excel File<span class="required">*</span>
+					</label>
+
+					<div class="col-sm-4">
+						<input class="form-control" type="file" name="inputExcelFile"
+							ng-file-select="onFileSelect($files)" required></input>
+					</div>
+
+				</div>
+				<div class="col-md-offset-3">
+					<button id="btnGetTemplate" type="submit" class="btn btn-primary"
+						has-permission='CREATE_LOAN'>Submit Excel File</button>
+				</div>
+			</fieldset>
+		</form>
+		
+		<form name="getTemplateFormRepayment" novalidate="" class="form-horizontal well" rc-submit="getLoanRepaymentTemplate()">
+		    <api-validate></api-validate>
+		    <fieldset>
+		        <legend>Get Loan Repayment Template</legend>
+				
+		        <div class="form-group">
+		            
+		        </div>
+		        <div class="col-md-offset-3">
+		            <button id="btnGetTemplate" type="submit" class="btn btn-primary" has-permission='CREATE_LOAN'>Get Template</button>
+		        </div>
+		    </fieldset>
+		</form>
+
+		<form name="importLoanFormRepayment" novalidate=""
+			class="form-horizontal well" rc-submit="importLoanRepayments()">
+			<api-validate></api-validate>
+			<fieldset>
+				<legend>Import Loan Repayments</legend>
+				<div class="form-group">
+
+					<br> <label class="control-label col-sm-3">Select the
+						Excel File<span class="required">*</span>
+					</label>
+
+					<div class="col-sm-4">
+						<input class="form-control" type="file" name="inputExcelFile"
+							ng-file-select="onFileSelect($files)" required></input>
+					</div>
+
+				</div>
+				<div class="col-md-offset-3">
+					<button id="btnGetTemplate" type="submit" class="btn btn-primary"
+						has-permission='CREATE_LOAN'>Submit Excel File</button>
+				</div>
+			</fieldset>
+		</form>
+
+		<div class="col-md-offset-3">
+			<a id="cancel" href="#/">
+				<button type="reset" class="btn btn-default">{{'label.button.cancel'|
+					translate}}</button>
+			</a>
+		</div>
+
+	</div>
+</div>

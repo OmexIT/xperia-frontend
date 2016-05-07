@@ -1,0 +1,458 @@
+<div class="col-md-12" ng-controller="ClientPaymentsController">
+	<div>
+		<ul class="breadcrumb">
+			<li>{{client.officeName}}</li>
+			<li>{{client.staffName}}</li>
+		</ul>
+	</div>
+	<div class="row">
+		<div class="col-md-8 col-sm-8">
+			<h3 class="client-title">
+				{{'label.heading.clientpayments' | translate}}
+				<i class="icon-circle {{client.status.code | StatusLookup}}"></i>
+				<small ng-if="client.subStatus.description">
+					[{{client.subStatus.description}}]
+				</small>
+				<strong>{{client.displayName}} </strong>
+				<small>
+					{{ 'label.heading.clientno' | translate }}: {{client.accountNo}} |
+					{{ 'label.input.externalid' | translate }}: {{client.externalId}} |
+					{{ 'label.input.staff' | translate }}: {{client.staffName}}
+				</small>
+			</h3>
+		</div>
+	</div>
+	<div >
+		<table>
+			<tr ng-if="mpesaAmount!=null"></tr>
+			<tr ng-if="mpesaAmount!=null">
+				<td><strong> Transaction Date: {{TxnDate}} | TransactioId:   {{mpetxnsacode}} | Amount:  {{mpesaAmount}} </strong></td>
+			</tr>
+		</table>
+	</div>
+	<div ng-show="showError==true">
+		  <p  style="color:red"> Total Amount must be equal to : {{mpesaAmount}} </p>
+	</div>
+	<div class="col-md-12 col-sm-12" ng-show="showErrorMsg==true">
+		<p style="..."> <font color="red"> Error in transaction, Transaction can not be completed...!  {{Error}}</font> </p>
+	</div>
+
+		<div class="col-md-12 col-sm-12">
+		<div class="row client">
+			<div class="col-sm-12 col-md-12 paddingleft0px">
+				<div data-ng-show="loanAccounts || savingsAccounts">
+					<form name="clientpayments" class="form-horizontal well">
+						<api-validate></api-validate>
+						<div ng-show="showError==true">
+							<p style="color:red">Loan Transaction cannot be before the last transaction date</p>
+						</div>
+						<div>
+							<table class="table table-condensed">
+								<tr class="graybg" data-ng-show="loanAccounts">
+									<th>{{'label.heading.loans' | translate}}</th>
+									<th>{{'label.heading.accnum' | translate}}</th>
+									<th>{{'label.heading.loanaccount' | translate}}</th>
+									<th>{{'label.heading.loanamount' | translate}}</th>
+									<th>{{'label.heading.outstandingamount' | translate}}</th>
+									<th>{{'label.heading.dueamount' | translate}}</th>
+									<th>{{'label.heading.type' | translate}}</th>
+									<th>{{'label.heading.loans.repayments' | translate}}</th>
+									<th>{{'label.heading.Loancharges' |translate}}</th>
+									<th>{{'label.heading.addcharges'|translate}}</th>
+								</tr>
+								<tr ng-repeat="loanaccount in loanAccounts | orderBy:'id':true | filter:isLoanNotClosed">
+									<td><input id="actualDisbursementDate" type="hidden" name="actualDisbursementDate" ng-model="loanaccount.timeline.actualDisbursementDate"/></td>
+									<td class="pointer" data-ng-click="routeToLoan(loanaccount.id)">
+										<i ng-hide="loanaccount.inArrears" tooltip-placement="right" tooltip-placementoltip="{{loanaccount.status.value}}"
+										   class="icon-stop {{loanaccount.status.code | StatusLookup}}"></i>
+										<i ng-show="loanaccount.inArrears" tooltip-placement="right" tooltip="{{loanaccount.status.value}}"
+										   class="icon-stop {{loanaccount.status.code | StatusLookup}}overdue"></i>
+										{{loanaccount.accountNo}}
+									</td>
+									<td class="pointer" data-ng-click="routeToLoan(loanaccount.id)">{{loanaccount.productName}}</td>
+									<td class="pointer" data-ng-click="routeToLoan(loanaccount.id)">{{loanaccount.originalLoan|number}}</td>
+									<td class="pointer" data-ng-click="routeToLoan(loanaccount.id)">{{loanaccount.loanBalance|number}}</td>
+									<td class="pointer" data-ng-click="routeToLoan(loanaccount.id)">{{loanaccount.amountPaid|number}}</td>
+									<td class="pointer center" data-ng-click="routeToLoan(loanaccount.id)" ng-if="loanaccount.loanType.value == 'Individual'">
+										<i tooltip="{{loanaccount.loanType.value}}" class="icon-user icon-large"></i>
+									</td>
+									<td class="pointer center" data-ng-click="routeToLoan(loanaccount.id)" ng-if="loanaccount.loanType.value != 'Individual'">
+										<i tooltip="{{loanaccount.loanType.value}}" class="icon-group icon-large"></i>
+									</td>
+									<td ng-if="loanaccount.status.active" align="right">
+										<input class="col-sm-8" id="repaymentAmount" type="text" name="repaymentAmount"
+											   ng-model="loanaccount.repaymentAmount" ng-change="keyPress()" class="form-control"  number-format required late-Validate/>
+										<input id="loanactiveCheckbox" ng-change="keyPress()" ng-model="loanaccount.active"
+											   ng-init="loanaccount.active=true" ng-checked="true" type="checkbox"/></td>
+									<td ng-if="loanaccount.status.active"> &nbsp;&nbsp;&nbsp;&nbsp;{{loanaccount.charges1|number}}
+										<i class="icon-question-sign" tooltip={{loanaccount.chargeDescription1}} tooltip-append-to-body="true"></i>&nbsp;
+										<a ng-click="loancharge(loanaccount.id)">&nbsp;<i class="fa fa-hand-o-right"></i></a>
+									</td>
+									<td ng-if="loanaccount.status.active">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a ng-click="showAddLoanCharges(loanaccount.id)">&nbsp;<i class="icon-plus icon-blue"></i></a>
+									</td></tr>
+
+								<!-- for displaying charges
+								-->
+
+								<tr ng-show="showLoanCharge==true"><td colspan="5"></td><td colspan="5">
+									<div class="col-sm-12 col-md-12 paddingleft0px" ng-show="showLoanCharge==true" >
+										<table  class="table table-condensed">
+											<tr  class="graybg">
+												<th>{{'label.heading.applycharges'|translate}}</th>
+												<th>{{'label.heading.chargeduedate'|translate}}</th>
+												<th>{{'label.heading.Amount'|translate}}</th>
+												<th >{{'label.heading.actions' | translate}}</th>
+											</tr>
+											<tr ng-repeat="charge in loanCharges | filter:{isActive:showActiveCharges}" ng-if="charge.id==id">
+												<td>{{charge.chargeName}}</td>
+												<td>{{charge.date}}</td>
+												<td>{{charge.chargeDue| number}}</td>
+												<td>
+                                                    <span>
+                                                           <a title="{{'label.button.waivecharge' | translate}}"
+									                        ng-click="waiveloanCharges(id,charge.chargeId)">
+															   <i class="icon-flag icon-white"></i></a>
+													</span>
+												</td>
+											</tr>
+										</table>
+									</div></td>
+								</tr>
+								<tr ng-show="showinstallmentCharge ==true"><td colspan="6"></td><td colspan="6">
+									<div class="col-sm-12 col-md-12" ng-show="showinstallmentCharge ==true" ng-init="showLoanCharge=false">
+										<label class="control-label col-sm-7" for="note">{{ 'label.input.waiveloanchargeInstallment' | translate}}</label>
+										<div class="col-sm-5 col-md-5">
+											<select id="installmentNumber" ng-model="formData.installmentNumber" class="form-control"class="control-label col-sm-6"
+													ng-options="installmentCharge.installmentNumber as installmentCharge.installmentNumber for installmentCharge in installmentCharges"
+													value="{{installmentCharge.installmentNumber}}"></select>
+										</div>
+										<br></br>
+										<div class="col-md-offset-8">
+											<a id="cancel2" ng-click="loanInstallmentChargesCancel()" class="btn btn-default">{{'label.button.cancel' |
+												translate}}</a>
+											<button id="save2" type="submit" class="btn btn-primary" ng-click="waiveloanInstallmentCharges(id,chargeid1)" >{{'label.button.save' | translate}}</button>
+										</div>
+										</div>
+									</td>
+								</tr>
+								<!--
+                                for addings Loan charges
+                                -->
+                              <tr ng-show="addLoanCharges==true"><td colspan="6"></td><td colspan="6">
+								<div ng-show="addLoanCharges==true">
+									<form class="form-horizontal well"  name="loanchargeform" >
+										<api-validate></api-validate>
+										<fieldset>
+											<div class="form-group">
+												<label class="control-label col-sm-6" for="chargeId">{{ 'labe.input.addloancharge' | translate }}<span
+														class="required">*</span></label>
+												<div class="col-sm-6">
+													<select id="chargeId" ng-model="formData.chargeId" class="form-control"
+															ng-options="charge.id as (charge.name+' '+'('+charge.currency.name+')') for charge in charges"
+															value="{{formData.chargeId}}" ng-change="selectCharge()" class="form-control" required>
+														    <option value="">{{'label.selectcharge' | translate}}</option>
+												</select>
+												</div>
+											</div>
+											<div ng-hide="isCollapsed">
+												<div class="form-group">
+													<label class="control-label col-sm-6" for="amount">{{ 'label.input.amount' | translate }}<span
+															class="required">*</span>
+													</label>
+												<div class="col-sm-6">
+														<input id="amount" type="text" class="form-control" name="amount" ng-model="formData.amount" required
+														  number-format ng-late-Validate>
+												</div>
+												<div class="col-sm-6">
+						                            <span ng-show="loanchargeform.amount.$invalid">
+                                                            <small class="error">
+																{{ 'label.requiredfield' | translate }}
+															</small>
+                                                     </span>
+												</div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-6">{{ 'label.input.chargecalculation' | translate }}</label>
+													<div class="col-sm-6">
+													<input type="text" class="form-control" value="{{chargeData.chargeCalculationType.value}}" readonly>
+												    </div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-sm-6">{{ 'label.input.chargetime' | translate }}</label>
+													<div class="col-sm-6">
+													<input type="text" class="form-control" value="{{chargeData.chargeTimeType.value}}" readonly>
+													</div>
+												</div>
+												<div class="form-group" ng-show="chargeData.chargeTimeType.id==2">
+													<label class="control-label col-sm-6">{{ 'label.input.dueon' | translate }}<span
+													class="required">*</span></label>
+													<div class="col-sm-6">
+														<input id="dueDate" type="text" datepicker-pop="dd MMMM yyyy" class="form-control"
+														 placeholder="{{'label.input.duedate' | translate}}" ng-model="formData.dueDate"
+														 is-open="opened" min="minDate" max="'2020-06-22'"/>
+													</div>
+												</div>
+											</div>
+										</fieldset>
+										<div class="col-md-offset-8">
+											<button id="cancel1"   class="btn btn-default" ng-click="cancleLoanCharge()">{{ 'label.button.cancel' | translate }}
+											</button>
+											<button id="save1" type="submit" class="btn btn-primary" ng-click="submitLoanCharge()" has-permission='CREATE_LOANCHARGE' ng-show="!isCollapsed">{{ 'label.button.save' |
+												translate }}
+											</button>
+										</div>
+									</form>
+								</div></td></tr>
+						<tr class="graybg" data-ng-show="savingsAccounts">
+									<th>{{'label.heading.deposits' | translate}}</th>
+									<th>{{'label.heading.accnum' | translate}}</th>
+									<th>{{'label.heading.savingaccount' | translate}}</th>
+									<th></th>
+									<th class="center">{{'label.heading.balance' | translate}}</th>
+									<th></th>
+									<th></th>
+									<th>{{'label.heading.savings.deposits' | translate}}</th>
+									<th>{{'label.heading.Savingcharges'|translate}}</th>
+									<th>{{'label.heading.addsavingcharges'|translate}}</th>
+								</tr>
+
+								<tr ng-repeat="savingaccount in savingsAccounts | orderBy:'id':true | filter:isSavingNotClosed">
+									<td><input id="activatedOnDate" type="hidden" name="activatedOnDate" ng-model="savingaccount.timeline.activatedOnDate"/></td>
+									<td class="pointer" data-ng-click="routeToSaving(savingaccount.id, savingaccount.depositType.code)">
+										<i tooltip-placement="right" tooltip="{{savingaccount.status.value}}" class="icon-stop {{savingaccount.status.code | StatusLookup}}"></i>
+										{{savingaccount.accountNo}}
+									</td>
+									<td  colspan ="2" class="pointer" data-ng-click="routeToSaving(savingaccount.id, savingaccount.depositType.code)">{{savingaccount.productName}}</td>
+									<!--<td></td>
+									-->
+									<td  colspan="2"class="pointer center" data-ng-click="routeToSaving(savingaccount.id, savingaccount.depositType.code)">{{savingaccount.accountBalance|number}}</td>
+									<!--<td></td>
+									-->
+									<td></td>
+									<td   align="right">
+										<input class="col-sm-8" id="depositAmount" type="text" name="depositAmount" ng-value="savingaccount.value|number"
+											   ng-model="savingaccount.depositAmount" ng-change="keyPress()" class="form-control" class="form-control"
+											   number-format required late-Validate>
+
+										<input ng-hide="false" id="savingactiveCheckbox" ng-change="keyPress()" ng-model="savingaccount.active"
+											   ng-init="savingaccount.active=true" ng-checked="true" type="checkbox" />
+									</td>
+									<td> &nbsp;&nbsp;&nbsp;&nbsp;{{savingaccount.charges2|number}}
+										<i class="icon-question-sign" tooltip={{savingaccount.chargeDescription2}} tooltip-append-to-body="true"></i>&nbsp;
+										<a ng-click="savingCharges(savingaccount.id)">&nbsp;<i class="fa fa-hand-o-right"></i></a>
+									</td>
+									<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a ng-click="showAddSavingsCharges(savingaccount.id)">&nbsp;<i class="icon-plus icon-blue"></i></a>
+									</td></tr>
+									    <tr ng-show="showSavingCharges==true"><td colspan="5"></td><td colspan="5">
+										<div class="col-sm-12 col-md-12 paddingleft0px" align="right" ng-show="showSavingCharges==true">
+											<table class="table table-condensed" align="right">
+												<tr  class="graybg">
+													<th>{{'label.heading.applycharges'|translate}}</th>
+													<th>{{'label.heading.chargeduedate'|translate}}</th>
+													<th>{{'label.heading.Amount'|translate}}</th>
+													<th >{{'label.heading.actions' | translate}}</th>
+												</tr>
+												<tr ng-repeat="charge in savingsCharges | filter:{isActive:showActiveCharges}" ng-if="charge.id==id">
+													<td>{{charge.chargeName}}</td>
+													<td>{{charge.date}}</td>
+													<td>{{charge.chargeDue| number}}</td>
+													<td>
+														<span>
+															<a title="{{'label.button.waivecharge' | translate}}" has-permission="WAIVE_SAVINGSACCOUNTCHARGE"
+															  ng-click="waiveSavingCharges(id,charge.chargeId)"> <i
+																	class="icon-flag icon-white"></i></a>
+														</span>
+													</td>
+												</tr>
+											</table>
+										</div>
+								        </td></tr>
+								<!--
+                                    for adding savings charges
+                                    -->
+								<tr ng-show="addSavingsCharges==true"><td colspan="6"></td><td colspan="6"><div ng-show="addSavingsCharges==true">
+									<form name="savingccountchargeform" novalidate="" class="form-horizontal ">
+										<api-validate></api-validate>
+										<fieldset>
+											<div class="form-group">
+												<label class="control-label col-sm-6">{{ 'label.input.savingscharge' | translate }}<span class="required">*</span></label>
+												<div class="col-sm-6">
+													<select ng-model="formData.chargeId" id="chargeId" name="charge"
+															ng-options="charge.id as (charge.name+&nbsp;+'('+charge.currency.name+')') for charge in chargeOptions"
+															value="{{formData.chargeId}}"
+															ng-change="chargeSelected(formData.chargeId)" class="form-control" required>
+														<option value="">{{'label.selectcharge' | translate}}</option>
+													</select>
+													<form-validate valattributeform="savingccountchargeform" valattribute="charge"/>
+												</div>
+											</div>
+											<div ng-hide="isCollapsed">
+												<div class="form-group">
+													<label class="control-label col-sm-6">{{ 'label.input.amount' | translate }}<span
+															class="required">*</span></label>
+													<div class="col-sm-6">
+														<input id="amount" type="text" name="amount" ng-model="formData.amount" class="form-control" required ng-late-Validate/>
+														<form-validate valattributeform="savingccountchargeform" valattribute="amount"/>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-sm-6">{{ 'label.input.chargecalculation' | translate }}</label>
+
+													<div class="col-sm-6">
+														<select id="chargeCalculationType" ng-model="chargeCalculationType"
+																ng-options="chargeCalculation.id as chargeCalculation.value for chargeCalculation in chargeDetails.chargeCalculationTypeOptions"
+																value="{{chargeCalculation.id}}" disabled="disabled" class="form-control">
+														</select>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-sm-6">{{ 'label.input.chargetimetype' | translate }}</label>
+													<div class="col-sm-6">
+														<select id="chargeTimeType" ng-model="chargeTimeType"
+																ng-options="chargeTime.id as chargeTime.value for chargeTime in chargeDetails.chargeTimeTypeOptions"
+																value="{{chargeTime.id}}" disabled="disabled" class="form-control">
+														</select>
+													</div>
+												</div>
+												<div class="form-group" ng-show="!withDrawCharge && !chargeTimeTypeAnnualOrMonth">
+													<label class="control-label col-sm-6">Due on<span
+															class="required">*</span></label>
+
+													<div class="col-sm-6">
+														<input id="feeOnAnnualMonthDay" sort type="text" datepicker-pop="dd MMMM yyyy"
+															   ng-model="date.specificduedate" is-open="opened" class="form-control"/>
+													</div>
+												</div>
+												<div class="form-group" ng-show="!withDrawCharge && chargeTimeTypeAnnualOrMonth">
+													<label class="control-label col-sm-6">{{ 'label.input.dueon' | translate }}<span
+															class="required">*</span></label>
+
+													<div class="col-sm-6">
+														<input id="feeOnMonthDay" sort type="text" datepicker-pop="dd MMMM" ng-model="date.due"
+															   is-open="opened" class="form-control"/>
+													</div>
+												</div>
+												<div class="form-group" ng-show="chargeTimeType.value == 'Monthly Fee' ">
+													<label class="control-label col-sm-6">{{ 'label.repeatsevery' | translate }}<span
+															class="required">*</span></label>
+
+													<div class="col-sm-6">
+														<input type="text" class="input-small" ng-model="formData.feeInterval" class="form-control"/>
+													</div>
+												</div>
+											</div>
+											<div class="col-md-offset-8">
+												<a id="cancel2" ng-click="canceSavingsCharges()"  class="btn btn-default">{{'label.button.cancel' |
+													translate}}</a>
+												<button id="save2" type="submit" class="btn btn-primary" ng-click="submitSavingsCharge()" has-permission='CREATE_SAVINGSACCOUNTCHARGE'>{{'label.button.save' | translate}}</button>
+											</div>
+										</fieldset>
+									</form>
+								</div></td></tr>
+
+								<tr class="graybg">
+									<th colspan="7">{{'label.clientpayments.totalAmount' | translate}}</th>
+									<th><input class="col-sm-8" id="totalAmount" type="text" ng-disabled="true" name="totalAmount"
+											   ng-model="formData.totalAmount" class="form-control" number-format /></th>
+									<th></th>
+									<th></th>
+								</tr>
+							</table>
+						</div>
+						<div>
+							<table class="table table-condensed">
+								<tr>
+									<td class="col-sm-3">
+										<label class="control-label">{{ 'label.input.submittedon' | translate
+											}}&nbsp;<span class="required">*</span></label>
+									</td>
+
+									<td class="col-sm-3"  ng-if="mpesaPayment==false">
+										<input id="submittedOnDate" sort type="text" datepicker-pop="dd MMMM yyyy" ng-model="formData.submittedOnDate" is-open="opened" max="restrictDate" class="form-control"/>
+									</td>
+									<td class="col-sm-3" ng-if="mpesaPayment==true" >
+										<input id="submittedOnDate" sort type="text" datepicker-pop="dd MMMM yyyy" value={{TxnDate}} ng-model="formData.submittedOnDate" is-open="opened" max="restrictDate" ng-disabled="true" class="form-control"/>
+									</td>
+
+									<td>&nbsp;</td>
+									<td class="col-sm-3">
+										<label class="control-label" for="paymentTypeId">{{ 'label.input.paymenttype' | translate}}<span
+												class="required">*</span></label>
+									</td>
+									<td class="col-sm-3">
+										<select id="paymentTypeId" ng-model="formData.paymentTypeId"
+												ng-options="paymentType.id as paymentType.name for paymentType in paymentTypes"
+												value="{{paymentType.id}}" class="form-control">
+										</select>
+									<td>
+								</tr>
+								<tr>
+									<td class="col-sm-3">
+
+										<label class="control-label" for="receiptNumber">{{ 'label.input.receiptnumber' | translate}}<span
+												class="required">*</span></label>
+									</td>
+									<td class="col-sm-3" ng-if="mpesaPayment==true">
+										<input id="receiptNumber" class="form-control" type="text" value={{mpetxnsacode}} ng-model="formData.receiptNumber" ng-disabled="true" >
+									</td>
+									<td class="col-sm-3" ng-if="mpesaPayment==false">
+										<input id="receiptNumber" class="form-control" type="text" ng-model="formData.receiptNumber">
+									</td>
+									<td>&nbsp;</td>
+									<td class="col-sm-3">
+										<label class="control-label" for="accountNumber">{{ 'label.input.accnum' | translate}}</label>
+									</td>
+									<td class="col-sm-3">
+										<input id="accountNumber" type="text" class="form-control" ng-model="formData.accountNumber">
+									</td>
+								</tr>
+								<tr>
+									<td class="col-sm-3">
+										<label class="control-label" for="checkNumber">{{ 'label.input.checknumber' | translate}}</label>
+									</td>
+									<td class="col-sm-3">
+										<input id="checkNumber" class="form-control" type="text" ng-model="formData.checkNumber">
+									</td>
+									<td>&nbsp;</td>
+									<td class="col-sm-3">
+										<label class="control-label" for="routingCode">{{ 'label.input.routingcode' | translate}}</label>
+									</td>
+									<td class="col-sm-3">
+										<input id="routingCode" class="form-control" type="text" ng-model="formData.routingCode">
+									</td>
+								</tr>
+								<tr>
+									<td class="col-sm-3">
+										<label class="control-label" for="bankNumber">{{ 'label.input.banknumber' | translate}}<span class="required">*</span></label>
+
+									</td>
+									<td class="col-sm-3">
+										<input id="bankNumber" class="form-control" sort type="text" ng-model="formData.bankNumber" datepicker-pop="dd MMMM yyyy" is-open="opened" max="restrictDate" >
+
+									</td>
+									<td>&nbsp;</td>
+									<td></td>
+									<td></td>
+								</tr>
+							</table>
+							<div class="col-md-offset-5">
+								<button id="cancel" type="reset" class="btn btn-default" ng-click="cancel()">{{ 'label.button.cancel' | translate}}</button>
+								<button id="save" type="submit" ng-show="isDisabled" class="btn btn-primary" ng-click="submitPayments()">{{ 'label.button.save' | translate}}</button>
+								<button id="precipitant" ng-show="isDisabled" type="submit" class="btn btn-primary" ng-click="submitPaymentsAndPrint()">{{ 'label.button.submitandprint' | translate}}</button>
+							</div>
+							<div>
+								<button ng-show="printbtn" ng-click="printReport()" class="btn btn-primary"><i class="icon-print icon-white">{{'label.button.print' |
+									translate}}
+								</i></button>
+								<div id="printreceiptcontent">
+									<iframe id="rptLoadingreceiptFrame" ng-src="{{baseURL}}" frameborder="0" width="100%" height="800px"></iframe>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+

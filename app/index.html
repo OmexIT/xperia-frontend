@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link rel="icon" type="image/png" href="./images/icons/logo.ico" />
+	<link rel="icon" type="image/png" href="./images/favicon.png" />
+    <title>{{ 'label.heading.financexperiaclient' | translate }}</title>
+    <style>[data-ng-cloak] { display: none !important; }</style>
+</head>
+<body  class="preview whitebg" id="top" data-spy="scroll" data-target=".subnav" data-offset="80" data-ng-controller="MainController">
+<!--Loader -->
+
+<div id="loaderWrapper" data-ng-hide="domReady" style="position: absolute; height: 100%; width: 100%; top: 0;">
+    <div id="loader" style="margin: 175px auto">
+        <!--<img src="./images/logos/logo_medium.png" alt="Finance Xperia" style="min-width: 50px;   width: 6%; margin: 0 auto" class="img-responsive">-->
+        <img src="./images/loader.gif" style="margin: 10px auto" class="img-responsive">
+    </div>
+</div>
+<div data-ng-hide="!domReady" data-ng-cloak>
+<!--
+    <nav class="navbar navbar-fixed-top navbarColor" data-ng-hide="currentSession.user != null">
+        <div class="container-fluid">
+            <div class="col-md-6">
+                <a class="navbar-brand" href="http://www.softboxperiatech.com/">
+                    <img src="./images/logos/softboxperia.png" alt="Finance Xperia" width="40" class="img-responsive"/>
+                </a>
+            </div>
+            <div class="pull-right language">
+                <div class="btn-group" dropdown >
+                    <button type="button" class="btn btn-primary dropdown-toggle" ng-disabled="disabled">
+                        {{optlang.name}} <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu lang-dropdown">
+                        <li ng-repeat="lang in langs">
+                            <a href="#" ng-click="changeLang(lang, $event)">{{lang.name}}</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav> -->
+    <!-- Login Form  -->
+	<div id="login-wrapper" data-ng-form="loginForm" data-ng-controller="LoginFormController" data-ng-hide="currentSession.user != null">
+	  <div id="login_box">
+		<div id="school-name">
+			{{'label.input.company.name' | translate }}
+		</div>
+		<div id="login-input-box">
+		  <div id="logo_area">
+			<div id="top_logo">
+			  <img alt="Finance Xperia" src="./images/logos/default_logoSmall.png" class="img-responsive">
+			</div>
+		  </div>
+			<div id="login_area">
+					<div ng-hide="resetPassword">
+						<form role="form">
+						     <div data-ng-show="load" style="position: absolute; top: 50%; left: 48%; z-index: 1000;">
+								<img src="images/cubic_loader.gif" class="img-responsive">
+							</div>
+								<div id="username_textbox_bg">
+									<input ng-autofocus="true" type="text" class="input-sm form-control" data-ng-model="loginCredentials.username" placeholder="{{ 'label.input.username' | translate }}" required id="uid">
+								</div>
+							<div id="password_textbox_bg">
+								<input type="password" class="input-sm form-control" data-ng-model="loginCredentials.password" placeholder="{{ 'label.input.password' | translate }}" required id="pwd" >
+							</div>
+							<button class="btn btn-success" type="submit" data-ng-click="login()" id="login-button">{{ 'label.button.signin' | translate }}</button>
+							<div id="notice" data-ng-show="authenticationFailed">{{ authenticationErrorMessage | translate }}</div>
+						</form>
+					</div>
+					<div ng-show="resetPassword">
+						<form class="form-inline role="form">
+							<label><strong>{{ 'label.message.password.expired' | translate }}</strong></label>
+							<div id="password_textbox_bg">
+								<input type="password" class="input-sm form-control" data-ng-model="passwordDetails.password" placeholder="{{ 'label.input.password' | translate }}" required id="password" style="width:240px;"><p></p>
+							</div>
+							<div id="password_textbox_bg">
+								<input type="password" class="input-sm form-control" data-ng-model="passwordDetails.repeatPassword" placeholder="{{ 'label.input.repeatpassword' | translate }}" required id="repeatPassword" style="width:240px;">
+							</div>
+							<button class="btn btn-success" type="submit" data-ng-click="updatePassword()" id="updatepassword-button">{{ 'label.button.resetPassword' | translate }}</button>
+						</form>
+					</div>
+			</div>
+		</div>
+	  </div>
+	  <div id="powered_by_div">
+		{{ 'label.powered.by' | translate }} <a href="http://www.facebook.com/softboxperiatech" target="_blank" class="themed_text">{{ 'label.developer.name' | translate }} </a>
+	  </div>
+	</div>
+    <!-- Navbar -->
+    <div ng-class="{fullscreen:true ,blockui:blockUI==true}" id="main" data-ng-hide="currentSession.user == null">
+        <div class="loading-widget-div" data-ng-show="blockUI">
+            <div id="circularG">
+                <div id="circularG_1" class="circularG">
+                </div>
+                <div id="circularG_2" class="circularG">
+                </div>
+                <div id="circularG_3" class="circularG">
+                </div>
+                <div id="circularG_4" class="circularG">
+                </div>
+                <div id="circularG_5" class="circularG">
+                </div>
+                <div id="circularG_6" class="circularG">
+                </div>
+                <div id="circularG_7" class="circularG">
+                </div>
+                <div id="circularG_8" class="circularG">
+                </div>
+            </div>
+        </div>
+
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        	<div class="container-fluid container">
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+				<div class="ribbon" id="ribbon">
+					<ul class="nav navbar-nav" id="main-menu-left">
+					<li class="dropdown">
+						<a class="dropdown-toggle" has-permission='READ_CLIENTMENU' data-toggle="dropdown" ng-class="{ activate: isActive('clients') }"  href="#"><i class="icon icon-user"></i> {{ 'label.anchor.clients' | translate }}<b class="caret"></b></a>
+                            <ul class="dropdown-menu" id="swatch-menu">
+                                <li><a href="#/clients" has-permission='READ_CLIENT'>{{ 'label.anchor.viewclient' | translate }}</a></li>
+                                <li><a href="#/createclient" has-permission='CREATE_CLIENT'>{{ 'label.heading.createclient' | translate }}</a></li>
+                                
+                            </ul>
+					</li>
+					<li class="dropdown">
+						<a class="dropdown-toggle" has-permission='READ_GROUPMENU' data-toggle="dropdown" ng-class="{ activate: isActive('groups') }"  href="#"><i class="icon icon-user"></i> {{ 'label.anchor.groups' | translate }}<b class="caret"></b></a>
+                            <ul class="dropdown-menu" id="swatch-menu">
+                                <li><a href="#/groups" has-permission='READ_GROUP'>{{ 'label.anchor.viewgroup' | translate }}</a></li>
+								<li><a href="#/creategroup" has-permission='CREATE_GROUP'>{{ 'label.anchor.creategroup' | translate}}</a></li>
+                                <li><a href="#/centers" has-permission='READ_CENTER'>{{ 'label.anchor.viewcenter' | translate }}</a></li>
+								<li><a href="#/createcenter" has-permission='CREATE_CENTER'>{{ 'label.anchor.createcenter' | translate }}</a></li>
+                            </ul>
+					</li> 
+					<!--
+					<li class="dropdown">
+						<a class="dropdown-toggle" data-toggle="dropdown" ng-class="{ activate: isActive('clients') }"  href="#"><i class="icon icon-user"></i> {{ 'label.anchor.clients' | translate }}<b class="caret"></b></a>
+                            <ul class="dropdown-menu" id="swatch-menu">
+                                <li><a href="#/clients" has-permission='READ_CLIENT'>{{ 'label.anchor.clients' | translate }}</a></li>
+                                <li><a href="#/groups" has-permission='READ_GROUP'>{{ 'label.anchor.groups' | translate }}</a></li>
+                                <li><a href="#/centers" has-permission='READ_CENTER'>{{ 'label.anchor.centers' | translate }}</a></li>
+                            </ul>
+					</li> -->
+					<!--
+					<li class="dropdown">
+						<a class="dropdown-toggle" data-toggle="dropdown" ng-class="{ activate: isActive('groups') }"  href="#"><i class="icon icon-group"></i> {{ 'label.anchor.groups' | translate }}<b class="caret"></b></a>
+						<ul class="dropdown-menu" id="swatch-menu">
+							<li><a href="#/creategroup" has-permission='CREATE_GROUP'><i class="icon icon-plus"></i>&nbsp;{{ 'label.anchor.creategroup' | translate}}</a></li>
+							<li><a href="#/groups" has-permission='READ_GROUP'><i class="glyphicon-group"></i>&nbsp;{{ 'label.anchor.groups' | translate }}</a></li>
+							<li><a href="#/createcenter" has-permission='CREATE_CENTER'><i class="icon icon-plus"></i>&nbsp;{{ 'label.anchor.createcenter' | translate }}</a></li>
+							<li><a href="#/centers" has-permission='READ_CENTER'><i class="icon icon-map-marker"></i>&nbsp;{{ 'label.anchor.centers' | translate }}</a></li>
+							<li><a href="#/transfergroup" has-permission='TRANSFER_GROUP'><i class="icon icon-group"></i>&nbsp;{{ 'label.anchor.transfergroup' | translate }}</a></li>
+						</ul>
+					</li>
+					<li class="dropdown">
+						<a class="dropdown-toggle" data-toggle="dropdown" ng-class="{ activate: isActive('products') }"  href="#"><i class="icon icon-home"></i> {{ 'label.anchor.products' | translate }}<b class="caret"></b></a>
+						<ul class="dropdown-menu" id="swatch-menu">
+							<li><a href="#/savingproducts" has-permission='READ_SAVINGSPRODUCT'><i class="icon icon-tags"></i>&nbsp;{{ 'label.anchor.savings' | translate}}</a></li>
+							<li><a href="#/loanproducts" has-permission='READ_LOANPRODUCT'><i class="icon icon-bank"></i>&nbsp;{{ 'label.anchor.loans' | translate }}</a></li>
+							<li><a href="#/fixeddepositproducts" has-permission='READ_SAVINGSPRODUCT'><i class="icon icon-briefcase"></i>&nbsp;{{ 'label.anchor.fixeddepositproduct' | translate }}</a></li>
+							<li><a href="#/recurringdepositproducts" has-permission='READ_SAVINGSPRODUCT'><i class="icon icon-briefcase"></i>&nbsp;{{ 'label.anchor.recurringdepositproduct' | translate }}</a></li>
+							<li><a href="#/charges" has-permission='READ_CHARGE'><i class="icon icon-money"></i>&nbsp;{{ 'label.anchor.charges' | translate }}</a></li>
+							<li><a href="#/productmix" has-permission='READ_PRODUCTMIX'><i class="icon icon-random"></i>&nbsp;{{ 'label.anchor.productsmix' | translate }}</a></li>
+						</ul>
+					</li> -->
+					<li><a has-permission='READ_ACCOUNTINGMENU' ng-class="{ activate: isActive('acc') }" href="#/accounting"><i class="icon icon-money"></i> {{ 'label.anchor.accounting' | translate }}</a></li>
+					
+					<li class="dropdown" id="reports-menu">
+						<a class="dropdown-toggle" has-permission='READ_REPORTMENU' data-toggle="dropdown" ng-class="{ activate: isActive('rep') }" href="#"><i class="icon icon-bar-chart"></i> {{ 'label.anchor.reports' | translate }}<b class="caret"></b></a>
+						<ul class="dropdown-menu">
+							<li><a href="#/reports/all" has-permission='READ_REPORT'>{{ 'label.anchor.all' | translate }}</a></li>
+							<li><a href="#/reports/clients" has-permission='READ_REPORT'>{{ 'label.anchor.clients' | translate }}</a></li>
+							<li><a href="#/reports/loans" has-permission='READ_REPORT'>{{ 'label.anchor.loans' | translate }}</a></li>
+							<li><a href="#/reports/savings" has-permission='READ_REPORT'>{{ 'label.anchor.savings' | translate }}</a></li>
+							<li><a href="#/reports/funds" has-permission='READ_REPORT'>{{ 'label.anchor.funds' | translate }}</a></li>
+							<li><a href="#/reports/accounting" has-permission='READ_REPORT'>{{ 'label.anchor.accounting' | translate }}</a></li>
+							<li><a href="#/reports/management" has-permission='READ_REPORT'>{{ 'label.anchor.management' | translate }}</a></li>
+							<!-- <li><a href="#/xbrl" has-permission='READ_REPORT'>{{ 'label.anchor.xbrl' | translate }}</a></li> -->
+						</ul>
+					</li>
+					
+					<li class="dropdown" id="preview-menu">
+						<a class="dropdown-toggle" has-permission='READ_CONFIGURATIONMENU' data-toggle="dropdown" ng-class="{ activate: isActive('admin') }" href="#"><i class="icon icon-wrench"></i> {{ 'label.anchor.configuration' | translate }}<b class="caret"></b></a>
+						<ul class="dropdown-menu">
+							<li><a href="#/users" has-permission='READ_USER'>{{ 'label.anchor.users' | translate }}</a></li>
+							<li><a href="#/organization" has-permission='READ_ORGANISATIONMENU'>{{ 'label.anchor.organization' | translate }}</a></li>
+							<li><a href="#/system" has-permission='READ_SYSTEMMENU'>{{ 'label.anchor.system' | translate }}</a></li>
+							<li><a href="#/products" has-permission='READ_PRODUCTMENU'>{{ 'label.anchor.products' | translate }}</a></li>
+							<li><a href="#/templates" has-permission='READ_TEMPLATE'>{{ 'label.anchor.templates' | translate }}</a></li>
+							<li><a href="https://localhost:8443/DataMigrationTool/" target="_blank" class="themed_text" rel="ajax" has-permission='READ_TEMPLATE'>Import Data</a></li>
+							<!--<li><a href="./docs/Cash Release, Inflow, Outflow and Balancing forms.pdf" target="_blank" class="themed_text" rel="ajax" has-permission='READ_TEMPLATE'>{{ 'label.anchor.cash.release.form' | translate }}</a></li> 
+							<li><a href="runApp('D:/Engineer's/Projects/SAACO Project/Incubation Room/finance-xperia-client/app/scripts/database backup scripts.bat');">Backup Database</a></li>-->
+						</ul>
+					</li>
+					<li class="dropdown">
+						<a class="dropdown-toggle" has-permission='READ_PENDING_TASK' data-toggle="dropdown" href="#" ng-class="{ activate: isActive('pendingtasks') }"  href="#"><i class="icon icon-list-alt"></i>&nbsp; Tasks<b class="caret"></b></a>
+						<ul class="dropdown-menu" id="swatch-menu">
+							<li><a href="#/tasks" has-permission='READ_PENDING_TASK'>Pending Approval</a></li>
+							<li><a href="#/mobilemoney" has-permission='READ_MMPAYMENT'>Mobile Money</a> </li>
+							<li><a href="#/sms" has-permission='READ_SMSMODULE'>{{ 'label.anchor.smsModule' | translate }}</a></li>
+							<li><a href="#/smscampaign" has-permission='READ_SMSMODULE'>{{ 'label.anchor.smsCampaign' | translate }}</a></li>
+							<!-- <li><a href="#/payments" has-permission='READ_MMPAYMENT'>{{ 'label.anchor.payment' | translate }}</a></li> 
+							<li><a href="#/reportmails/reportmailingjob" has-permission='READ_EMAILREPORTS'>Report Scheduler</a></li> -->
+						</ul>
+					</li>
+					<!-- This is a global search bar -->
+						<form class="ow og i" role="search" ng-submit="search()">
+							<div class="input-group">
+								<div class="fj">
+									<button type="button" class="btn btn-warn dropdown-toggle" data-toggle="dropdown">
+										 {{currentScope.name | translate}}<span class="caret"></span>
+									</button>
+									<ul class="dropdown-menu" role="menu">
+										<li ng-repeat="searchScope in searchScopes" ng-click="changeScope(searchScope)">
+											<a href= "">{{ searchScope.name |translate}}</a>
+										</li>
+									</ul>
+								</div>
+								<input data-action="grow" data-ng-model="search.query" type="text" placeholder="{{ 'label.searchorpress' | translate }}" class="form-control" />
+							</div>
+						</form>
+				<!--		
+					<div class="collapse navbar-collapse" id="languagebar">
+						<ul class="nav navbar-nav" id="main-menu-left">
+							<li class="dropdown">
+							  <a id= "help-login" class="dropdown-toggle" role="button" data-toggle="dropdown" href="#"><i class="icon icon-book"></i> Help <span class="caret"></span></a>
+							  <ul id="g-account-menu" class="dropdown-menu" role="menu">
+								<li><a href="#">User Manuals</a></li>
+								<li><a href="./docs/Finance Xperia-Glossary.pdf" target="_blank" class="themed_text">Glosary</a></li>
+								<li><a href="./docs/2015 Roadmap Finance Xperia.pdf" target="_blank" class="themed_text">2015 Roadmap</a></li>
+								<li><a href="https://www.softboxperiatech.co.ug/page-privacy" target="_blank" class="themed_text">Privacy policy | T&C</a></li>
+							  </ul>
+							</li>
+					
+
+							<li class="dropdown" >
+							  <a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">
+							  <i class="icon icon-flag"></i> {{optlang.name}} <span class="caret"></span>
+							  </a>
+							  <ul class="dropdown-menu lang-dropdown">
+								<li ng-repeat="lang in langs">
+								  <a ng-click="changeLang(lang)">{{lang.name}}</a>
+								</li>
+							  </ul>
+							</li>
+						</ul>
+					</div> -->
+					</ul>
+				</div>
+				<div id="rightTabBg" class="right-tab-bg" href="#/home"></div>
+					<img src="./images/logos/application_logo.png" href="#/home" alt="Finance Xperia" id="rightLogo" class="right-logo"ondragstart="return false;">
+					<!--<img src="./images/banners/avatar-dhg.png" id="leftLogo" class=" cu left-logo" ondragstart="return false;"> -->
+					<img src="./images/logos/default_logoSmall.png" href="#/home" id="leftLogo" class=" cu left-logo" ondragstart="return false;">
+					<div class="login-information-div" href="#/home">
+						<span class="login-information">{{'label.input.company.name' | translate }}</span>
+					</div>
+                </div>
+            </div>
+        </nav>
+        <div class="container whitebg fullscreen">
+            <div>
+                <div class="row whitebg">
+                    <div class="col-md-12 pull-right whitebg">
+                        <div class="whitebg" ng-view></div>
+                    </div>
+					<!-- This is a new view of short-cut at the bottom
+					<nav class="navbar navbar-default navbar-fixed-bottom swag-line swag-line-bottom" role="navigation">
+						<div class="bottom-nav">
+							<ul class="nav nav-pills nav-stacked margin-nav">
+								<li><a class="black" href="#/entercollectionsheet"><i class="icon-tasks icon-large"></i>&nbsp;&nbsp;{{ 'label.anchor.collectionsheet' | translate}}</a></li>
+								<li class="divider"></li>
+								<li><a class="black" href="#/individualcollectionsheet"><i class="icon-tasks icon-large"></i>&nbsp;&nbsp;{{ 'label.anchor.individualcollectionsheet' | translate}}</a></li>
+								<li class="divider"></li>
+								<li><a class="black" href="#/freqposting"><i class="icon-repeat icon-large"></i>&nbsp;&nbsp;&nbsp;{{ 'label.anchor.frequentpostings' | translate}}</a></li>
+								<li class="divider"></li>
+								<li><a class="black" href="#/journalentry"><i class="icon-plus icon-large"></i>&nbsp;&nbsp;&nbsp;&nbsp;{{ 'label.anchor.addjournalentries' | translate}}</a></li>
+								<li class="divider"></li>
+								<li><a class="black" href="#/accounts_closure"><i class="icon-folder-close icon-large"></i>&nbsp;&nbsp;&nbsp;{{ 'label.anchor.closingentries' | translate}}</a></li>
+								<li class="divider"></li>
+								<li><a class="black" href="#/accounting_coa"><i class="icon-sitemap icon-large"></i>&nbsp;&nbsp;&nbsp;{{ 'label.heading.chartofaccounts' | translate}}</a></li>
+								<li class="divider"></li>
+								<li><a class="black" href="#/createclient"><i class="icon-user icon-large"></i> + {{ 'label.anchor.client' | translate}} </a></li>
+							</ul>
+						</div>
+					</nav>
+                    <!-- Footer -->
+					<nav class="navbar navbar-default navbar-fixed-bottom swag-line swag-line-bottom" role="navigation">
+						  <div class="navbar-header">
+							<!-- <a class="navbar-brand" tooltip= "Beta version - ? 2015 | SoftBox Xperia Technology - Moyo">Application Short-cuts</a> -->
+							<a class="navbar-brand">Application Short-cuts</a>
+						  </div>
+						  <ul class="nav navbar-nav">
+							<li class="dropdown">
+							  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+								<div></div>
+								<span class="caret up"></span>
+							  </a>
+							  <ul class="dropdown-menu" role="menu">
+								<li ng-click="changeScope(searchScope)"><a class="ng-binding" href="#/help"><i class="icon icon-keyboard icon icon-lg"></i>&nbsp;&nbsp;Keyboard Shortcuts</a></li>
+								<li ng-click="changeScope(searchScope)"><a class="ng-binding" href="#/nav/offices"><i class="icon icon-compass icon icon-lg"></i>&nbsp;&nbsp;Navigation</a></li>
+								<li><a class="ng-binding" href="#/entercollectionsheet" has-permission="SAVE_COLLECTIONSHEET"><i class="icon icon-tasks icon icon-lg"></i>&nbsp;&nbsp;Collection sheet</a></li>
+								<li><a class="ng-binding" href="#/individualcollectionsheet" has-permission="READ_COLLECTIONSHEET"><i class="icon icon-tasks icon icon-lg"></i>&nbsp;&nbsp;Individual Collection Sheet</a></li>
+								<li><a class="ng-binding" href="#/freqposting" has-permission="CREATE_JOURNALENTRY"><i class="icon icon-repeat icon icon-lg"></i>&nbsp;&nbsp;&nbsp;Frequent Postings</a></li>
+								<li><a class="ng-binding" href="#/journalentry" has-permission="CREATE_JOURNALENTRY"><i class="icon icon-plus icon icon-lg"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add Journal Entries</a></li>
+								<li><a class="ng-binding" href="#/accounts_closure" has-permission="READ_GLCLOSURE"><i class="icon icon-folder-close icon icon-lg"></i>&nbsp;&nbsp;&nbsp;Closing Entries</a></li>
+								<li><a class="ng-binding" href="#/accounting_coa" has-permission="READ_GLACCOUNT"><i class="icon icon-sitemap icon icon-lg"></i>&nbsp;&nbsp;&nbsp;Chart of Accounts</a></li>
+							  </ul>
+							</li>
+						  </ul>
+						  <div class="arrow">
+							<div id="powered_by">
+							  {{ 'label.powered.by' | translate }} <a href="http://www.softboxperiatech.co.ug" target="_blank" class="themed_text"> {{ 'label.developer.name' | translate }} </a> &copy; 2008 - 	<script>document.write(new Date().getFullYear())</script>{{ 'label.full.stop' | translate }} {{ 'label.all.rights.reserved' | translate }}
+							</div>
+							<a href="mailto:softboxperiatech@gmail.com"> {{ 'label.developer.help' | translate }} </a> - <a href="mailto:snazzymlo@yahoo.com"> {{ 'label.developer.support' | translate }} </a> - <a target=		"http://www.facebook.com/softboxperiatech/" href="http://www.facebook.com/softboxperiatech/">{{ 'label.facebook.page' | translate }} </a></ - <span class="muted credit"> </span>
+						  </div>
+						<ul class="navbar-right nav navbar-nav">
+							<li class="dropdown">
+							  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+								<small class="text-muted">Current User</small>
+								<div style="text-transform: Capitalize">{{currentSession.user.name}}
+	
+								</div>
+								<span class="caret up"></span>
+							  </a>
+							  <ul class="options dropdown-menu pull-right" aria-labelledby="drop-help" role="menu">
+								<li class="disabled"><a href="javascript:void(0)">
+								   <span><img src="./images/avatar-dhg.png" id="leftLogo" class=" cu left-logo" ondragstart="return false;">
+								   </span>
+								Logged as: {{currentSession.user.name}}</a></li>
+								<li class="divider"></li>
+								<li><a id="help" href="#/help"><i class="icon icon-question-sign"></i> {{ 'label.anchor.help' | translate }}</a></li>
+								<li><a href="#/profile"><i class="icon icon-user"></i> {{ 'label.anchor.profile' | translate }}</a></li>
+								<!-- <li><a href="Changelog.txt" target="_blank" class="themed_text" rel="ajax"><i class="icon icon-book"></i> {{ 'label.anchor.changelog' | translate }}</a></li> -->
+								<li><a href="#/usersetting"><i class="icon icon-cog"></i> {{ 'label.anchor.settings' | translate }}</a></li>
+							  </ul>
+							</li>
+							<li>
+							<button class="btn" data-toggle="collapse" data-ng-click="logout()"><i class="icon icon-off"></i>&nbsp;
+							  {{ 'label.anchor.logout' | translate }}
+							</button>
+							</li>
+						 </ul>				  
+					</nav>
+                </div> <!-- /row-fluid -->
+            </div><!-- /blockui-->
+        </div><!-- /container -->
+    </div>
+</div>
+<!-- Le javascript -->
+<script type='text/javascript' data-main="scripts/loader.js" src='bower_components/requirejs/require.js'></script>
+<!-- Placed at the end of the document so the pages load faster -->
+
+<!-- begin olark code -->
+<!--<script data-cfasync="false" type='text/javascript'>/*<![CDATA[*/window.olark||(function(c){var f=window,d=document,l=f.location.protocol=="https:"?"https:":"http:",z=c.name,r="load";var nt=function(){
+f[z]=function(){
+(a.s=a.s||[]).push(arguments)};var a=f[z]._={
+},q=c.methods.length;while(q--){(function(n){f[z][n]=function(){
+f[z]("call",n,arguments)}})(c.methods[q])}a.l=c.loader;a.i=nt;a.p={
+0:+new Date};a.P=function(u){
+a.p[u]=new Date-a.p[0]};function s(){
+a.P(r);f[z](r)}f.addEventListener?f.addEventListener(r,s,false):f.attachEvent("on"+r,s);var ld=function(){function p(hd){
+hd="head";return["<",hd,"></",hd,"><",i,' onl' + 'oad="var d=',g,";d.getElementsByTagName('head')[0].",j,"(d.",h,"('script')).",k,"='",l,"//",a.l,"'",'"',"></",i,">"].join("")}var i="body",m=d[i];if(!m){
+return setTimeout(ld,100)}a.P(1);var j="appendChild",h="createElement",k="src",n=d[h]("div"),v=n[j](d[h](z)),b=d[h]("iframe"),g="document",e="domain",o;n.style.display="none";m.insertBefore(n,m.firstChild).id=z;b.frameBorder="0";b.id=z+"-loader";if(/MSIE[ ]+6/.test(navigator.userAgent)){
+b.src="javascript:false"}b.allowTransparency="true";v[j](b);try{
+b.contentWindow[g].open()}catch(w){
+c[e]=d[e];o="javascript:var d="+g+".open();d.domain='"+d.domain+"';";b[k]=o+"void(0);"}try{
+var t=b.contentWindow[g];t.write(p());t.close()}catch(x){
+b[k]=o+'d.write("'+p().replace(/"/g,String.fromCharCode(92)+'"')+'");d.close();'}a.P(2)};ld()};nt()})({
+loader: "static.olark.com/jsclient/loader0.js",name:"olark",methods:["configure","extend","declare","identify"]});
+/* custom configuration goes here (www.olark.com/documentation) */
+olark.identify('9391-547-10-6064');/*]]>*/</script><noscript><a href="https://www.olark.com/site/9391-547-10-6064/contact" title="Send Feedback" target="_blank">Questions? Feedback?</a> powered by <a href="http://www.olark.com?welcome" title="Olark live chat software">Olark live chat software</a></noscript>
+&lt;!&ndash; end olark code &ndash;&gt;
+&lt;!&ndash; endcode &ndash;&gt;-->
+</body>
+</html>

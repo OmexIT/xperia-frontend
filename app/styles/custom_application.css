@@ -1,0 +1,158 @@
+
+.container-fluid .navbar-nav li { 
+  list-style: none; 
+  position: relative; 
+  top: 1px; 
+  margin: 0 0px 2px 0; 
+  border-bottom: 0 !important; 
+  padding: 0; 
+  white-space: nowrap; 
+}
+.container-fluid .navbar-nav li a { 
+  float: none; 
+  padding: .2em 1em; 
+  text-decoration: none; 
+}
+
+#bs-example-navbar-collapse-1 {
+    margin-top: 0px;
+    margin-right: 0px;
+    margin-left: 0px;
+    height: 55px;
+    position: fixed;
+    right: 0;
+    left: 0;
+    z-index: 1030;
+    top: 0px;
+}
+
+.navbar-fixed-top .login-information-div {
+    padding-left: 65px;
+    position: relative;
+    top: 5px;
+    width: auto;
+}
+
+.navbar-fixed-top .login-information-div .login-information {
+    color: #555555;
+    font-weight: bold;
+    margin-left: 10px;
+}
+.navbar-fixed-top .login-information-div .ow{
+  margin-right: 175px;
+  margin-top: -3px;
+}
+.cu {
+  border-radius: 50%;
+}
+
+.arrow{
+  text-align: center;
+  width: 450px;
+  float: none;
+  margin-left: auto;
+  margin-right: auto; 
+}
+.arrow p{
+
+}
+@media (min-width: 768px) {
+  .og {
+    float: left !important;
+    margin-right: -15px;
+    margin-top: 4px;
+  }
+  .og ~ .og {
+    margin-right: 0;
+  }
+}
+.pager li>a,.pager li>span{
+	color:#428BCA;
+}
+/*
+.tooltip
+{
+  text-decoration:none;
+  position:relative;
+  opacity: 0;
+}
+ 
+ 
+.tooltip span
+{
+  display:none;
+  -moz-border-radius:6px;
+  -webkit-border-radius:6px;
+  border-radius:6px;
+  color:black;
+  background:white; 
+}
+ 
+ 
+.tooltip span img
+{
+  float:right;
+  margin:0px 8px 8px 0;
+  max-width: 150px;
+  max-height: 126px;
+}
+ 
+ 
+.tooltip:hover span
+{
+  display:block;
+  position:absolute;
+  top:-220px;
+  left:-75px;
+  z-index:1000;
+  width:auto;
+  max-width:320px;
+  min-height:128px;
+  border:1px solid black;
+  margin-top:12px;
+  margin-left:32px;
+  overflow:hidden;
+  padding:8px;
+}
+*/
+
+.custom-upload {
+    position: relative;
+    height: 40px;
+    width: 350px;
+    margin:30px;
+}
+
+.custom-upload input[type=file]
+{
+    outline:none;
+    position: relative;
+    text-align: right;
+    -moz-opacity:0 ;
+    filter:alpha(opacity: 0);
+    opacity: 0;
+    z-index: 2;
+    width:100%;
+    height:100%;
+
+}
+
+.custom-upload .fake-file
+{
+    background:url(http://www.fold3.com/i/upload-icon.png) center right no-repeat;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 350px;
+    padding: 0;
+    margin: 0;
+    z-index: 1;
+    line-height: 100%;
+}
+
+.custom-upload .fake-file input
+{
+    font-size:16px;
+    height:40px;
+    width:300px;
+}

@@ -1,0 +1,133 @@
+<div class="col-md-12">
+    <ul class="breadcrumb">
+        <li><a href="#/organization">{{'label.anchor.organization' | translate}}</a></li>
+        <li class="active"><a href="#/sms">{{'label.anchor.sendoption' | translate}}</a></li>
+    </ul>
+    <api-validate></api-validate>
+
+    <form name="sendSmsForm" novalidate="" class="form-horizontal well" ng-controller="SmsController">
+        <div ng-show="complete1==true">
+            <h3>Sms Send Sucessfully</h3>
+        </div>
+        <div ng-show="send==false">
+            <p  style="color:red"> Branch is not enable for sending message </p>
+        </div>
+        <div ng-show="complete1==false && send ==true">
+        <fieldset class="smsleftclass">
+            <legend>{{'label.view.smsmanagement' | translate}}</legend>
+           <!--
+            <div class="col-sm-offset-2">
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <label for="sms">{{'label.input.sms'|translate}}</label>
+                <input id="sms" type="radio" ng-model="sendby" value="sms"/>
+                <label><ul></ul></label>
+                <label></label>
+                <label for="email">{{'label.input.email'|translate}}</label>
+                <input id="email" type="radio" ng-model="sendby" value="email"/>
+            </div>
+            -->
+
+            <div class="smsleftclass">
+                <div class="form-group">
+                    <label  class="control-label col-sm-1">{{ 'label.input.office' | translate }}</label>
+                    &nbsp;
+
+                    <div class="col-sm-3">
+
+                        <select chosen="offices" id="officeId" ng-model="formData.officeId" class="form-control"
+                                ng-options="office.id as office.name for office in offices"
+                                value="{{office.id}}" ng-change="fetchClientByOfficeId(formData.officeId)"></select>
+                        <br><br>
+
+
+                        <div class="input-group">
+                            <input  data-ng-model="searchText" type="text" placeholder="{{'label.input.searchByNameAccNo' | translate}}" class="form-control"/>
+                            <span class="input-group-btn">
+                                <button class="btn btn-primary form-control" ng-click="search()">
+                                    <span class="icon-search"></span>
+                                </button>
+                            </span>
+                        </div>
+
+
+
+                    </div>
+                    <label  class="control-label col-sm-3">{{'label.input.selectedClients'|translate}} </label>
+                    <label  class="control-label col-sm-3">{{'label.input.messageText'|translate}}<span
+                            class="required">*</span></label>
+
+
+                </div>
+
+                <div class="form-group">
+                    <div>
+                        <label class="control-label col-sm-1"> {{'label.input.clients'|translate}}</label>
+                        <div class="col-sm-3">
+                            <select id="id" ng-model="formData.id" name="client" class="form-control multiselectsms" multiple required>
+                                <option ng-repeat="client in clients" value="{{client.id}}" ng-selected=selected>
+                                    {{client.displayName}} - {{client.mobileNo}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-sm-1">
+                            <label class="control-label" ><button id="select"  class="btn btn-primary" tooltip="{{'label.tooltip.select' | translate}}" ng-click="addClient()">></button>
+                                <ul></ul>
+                                <button id="remove" type="button" class="btn btn-primary" tooltip="{{'label.tooltip.unselect' | translate}}" ng-click="removeClient()"><
+                                </button>
+                                <ul></ul>
+                                <button type="button" class="btn btn-primary" tooltip="{{'label.toottip.selectAll' | translate}}" ng-click="selectAll()"><i
+                                        class="icon-double-angle-right"></i></button>
+
+                                <ul></ul>
+                                <button type="button" class="btn btn-primary" tooltip="{{'label.toottip.RemoveAll' | translate}}" ng-click="clear()"><i
+                                        class="icon-double-angle-left"></i></button>
+
+                                <ul></ul>
+                            </label>
+                        </div>
+                        <div class="col-sm-3">
+                            <select id="mobileNo" ng-model="formData.client" name="client"  class="form-control selectedclient" multiple required>
+                                <option ng-repeat="selectedclient in client" value="{{selectedclient.id}}" ng-selected=selected>
+                                    {{selectedclient.displayName}} - {{selectedclient.mobileNo}}
+                                </option>
+                            </select>
+                            <ul></ul>
+                            <ul>
+                               <lable>{{'label.input.Additional Number'|translate}}
+                                <i class="icon-question-sign" tooltip="{{'label.tooltip.Additional Numbers' | translate}}" tooltip-append-to-body="true"></i>
+
+                               </lable>
+                            </ul>
+                                <textarea id="additionalNumber" name="AdditionalNumber" ng-model="formData.additionalNumber" rows="9"
+                                          cols="9" class="form-control" >
+                                </textarea>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <textarea id="MessageText" name="MessageText" ng-model="formData.messageText" rows="20"
+                                      cols="" class="form-control" required
+                                      late-Validate/>
+                            </textarea>
+                        </div>
+                        <div class="col-sm-2">
+                            <form-validate valattributeform="sendSmsForm" valattribute="MessageText"/>
+                        </div>
+                    </div>
+                </div>
+                <label class="control-label col-sm-4">{{  }}</label>
+
+                <div>
+                </div>
+                <div class="col-md-offset-9" >
+                    <button id="save" type="submit"  class="btn btn-primary" ng-click="sendMessage()">{{ 'label.button.send' | translate}}</button>
+                    <button id="cancel" type="reset" class="btn btn-danger" >{{ 'label.button.reset' | translate}}</button>
+					<a id="cancel" class="btn btn-default" href="#/organization">{{'label.button.cancel' | translate}}</a>
+                </div>
+
+            </div>
+        </fieldset>
+            </div>
+
+
+    </form>
+</div>

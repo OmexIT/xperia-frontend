@@ -1,0 +1,60 @@
+<div class="col-md-12" ng-controller="UploadxlsController">
+    <ul class="breadcrumb">
+        <li><a href="#/organization">{{'label.anchor.organization' | translate}}</a></li>
+        <li><a>{{'label.anchor.uploadxls' | translate}}</a></li>
+    </ul>
+    <br>
+    <br>
+
+    <form  class="form-horizontal well" ng-submit="submit()" >
+        <successful-responses/></successful-responses>
+        <api-validate></api-validate>
+        <div ng-hide= "submt == 1">
+
+
+            <div ng-show="submt==2">
+              <h4> <font color="red"> Error in file uploading. File not uploaded ..! </font> </h4>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="file">{{'label.input.selectfile' | translate}}<span
+                        class="required">*</span></label>
+                <div class="col-sm-3">
+
+                    <input id="file" type="file" ng-file-select="onFileSelect($files)">
+
+                </div>
+            </div>
+
+
+
+            <div class="form-group">
+
+                <label class="control-label col-sm-2">{{ 'label.input.office' | translate }}<span class="required">*</span></label>
+                <div class="col-sm-3">
+
+                    <select chosen="offices" id="officeId" ng-model="formData.officeId" class="form-control"
+                            ng-options="office.id as office.name for office in offices"
+                            value="{{office.id}}"></select>
+                </div>
+            </div>
+
+
+            <div class="col-md-offset-3">
+
+                <a id="cancel" href="#/organization/">
+
+                    <button type="reset" class="btn btn-default">{{'label.button.cancel' | translate}}</button>
+
+                </a>
+                <button id="save" type="submit"  class="btn btn-primary">
+                    {{'label.button.save' | translate}}
+                </button>
+            </div>
+        </div>
+        <div ng-show = "submt == 1">
+            <h3>File uploaded successfully</h3>
+        </div>
+
+        </form>
+</div>

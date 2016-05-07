@@ -1,0 +1,51 @@
+<div class="col-md-12">
+    <ul class="breadcrumb">
+        <li><a href="#/users">{{'users' | translate}}</a></li>
+        <li class="active">{{'label.anchor.userimporting' | translate}}</li>
+    </ul>
+    <div name="ImportUser" ng-controller="ImportUserController">
+    
+    	<!-- TODO -->
+    	<!-- Client input validation -->
+	    <form name="getTemplateForm" novalidate="" class="form-horizontal well" rc-submit="getUserTemplate()">
+		    <api-validate></api-validate>
+		    <fieldset>
+		        <legend>{{'label.getexcelTemplate' | translate}}</legend>
+		        <div class="form-group">
+		            
+		        </div>
+		        <div class="col-md-offset-3">
+		            <button id="btnGetTemplate" type="submit" class="btn btn-primary" has-permission='CREATE_USER'>{{'label.getexcelTemplate' | translate}}</button>
+		        </div>
+		    </fieldset>
+		</form>
+		
+		<form name="importGroupForm" novalidate="" class="form-horizontal well" rc-submit="importUsers()">
+		    <api-validate></api-validate>
+		    <fieldset>
+		        <legend>{{'label.anchor.userimporting' | translate}}</legend>
+		        <div class="form-group">
+				
+					<br>
+					
+		            <label class="control-label col-sm-3">{{'label.selectexcelfile' | translate}}<span class="required">*</span></label>
+		
+		            <div class="col-sm-4">
+		                <input class="form-control" type="file" name="inputExcelFile" ng-file-select="onFileSelect($files)" required ></input>
+		            </div>
+		            
+		        </div>
+		        <div class="col-md-offset-3">
+		            <button id="btnGetTemplate" type="submit" class="btn btn-primary" has-permission='CREATE_USER'>{{'label.submitexcelfile' | translate}}</button>
+		        </div>
+		    </fieldset>
+		</form>
+
+		<div class="col-md-offset-3">
+			<a id="cancel" href="#/import">
+				<button type="reset" class="btn btn-default">{{'label.button.cancel'| translate}}</button>
+			</a>
+		</div>
+
+	</div>
+</div>
