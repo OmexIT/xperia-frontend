@@ -166,7 +166,11 @@
                 });
 
                 //scope.client = [];
-            }
+            };
+
+            scope.fetchPendingSMS=function () {
+
+            };
 
             scope.search = function () {
                 scope.clients = [];
