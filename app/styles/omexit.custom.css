@@ -57,6 +57,14 @@
 /*border-top:1px solid #fff;*/
 /*}*/
 
+tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+tr:nth-child(odd) {
+    background-color: #fff;
+}
+
 .campaign-body h1 {
     /*position:absolute;*/
     left: 0;
@@ -93,6 +101,23 @@
     background: #bbb;
 }
 
+.schedule-params h2 {
+    width: 100%;
+    padding: 0.7em 0.7em 0.7em 0.7em;
+    color: #3a87ad;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+    font-size: 15px;
+}
+
+.schedule-params h1 {
+    padding: 0.25em 0.25em 0.25em 1em;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    background: #bbb;
+}
+
 .campaign-table th {
     background: #ddd;
     font-size: 13px;
@@ -101,6 +126,7 @@
 
 .campaign-table table {
     width: 100%;
+    margin-top: 5px;
 }
 
 .globalnav UL LI {
@@ -124,3 +150,60 @@
 .globalnav UL A.here:visited {
     color: #444;
 }
+
+.campaign-link {
+    color: rgba(34, 0, 134, 0.75);
+    text-decoration: underline;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.message-builder h2 {
+    width: 100%;
+    padding: 0.7em 0.7em 0.7em 0.7em;
+    color: rgba(0, 0, 0, 0.67);
+    background-color: rgba(0, 0, 0, 0.18);
+    border-color: rgba(0, 0, 0, 0.36);
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.campaign-message-filter{
+    background-color: #eee;
+    padding-top: 30px;
+}
+
+.ns-popover-tooltip-theme, .ns-popover-tooltip{
+    background: #41445a;
+    color: #fff;
+    cursor: default;
+    font-size: 12px;
+    /*line-height: 15px;*/
+    font-family: "Segoe UI","Helvetica",Garuda,Arial,sans-serif;
+    padding: 5px;
+}
+
+.ns-popover-tooltip dl {
+    /*margin-bottom:50px;*/
+    overflow: hidden;
+    width: 400px;
+    font-size: 11px;
+}
+
+.ns-popover-tooltip dl dt {
+    background:#5f9be3;
+    color:#fff;
+    float:left;
+    clear: left;
+    font-weight:bold;
+    margin-right:10px;
+    padding:2px;
+    width:120px;
+}
+
+.ns-popover-tooltip dl dd {
+    margin:2px 0;
+    padding:2px 0;
+}
+
+dd:after {content:' '; white-space:pre;}

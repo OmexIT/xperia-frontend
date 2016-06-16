@@ -15,7 +15,8 @@ define(['underscore'], function () {
 			'custom.breadcrumb.navbar',
 			'custom_application',
 			'RibbonView',
-            'omexit.custom'
+            'omexit.custom',
+            'angular-cron-jobs.min'
         ]
     };
 

@@ -1,6 +1,8 @@
 (function (module) {
     mifosX.controllers = _.extend(module, {
-        SmsCampaignController: function (scope, resourceFactory, location, $rootScope) {
+        SmsCampaignController: function (scope, resourceFactory, location, $rootScope, $http, $log, localStorageService, $filter) {
+            var smsPath = 'http://localhost:19886/sms';
+
             scope.campaignTypes = [
                 {id: 1, name: "Direct"},
                 {id: 2, name: "Scheduled"}
@@ -17,12 +19,22 @@
                 {id: 8, name: "Loan Fully Repaid"},
                 {id: 9, name: "Loan Outstanding After Final Installment Date"}];
 
+            scope.smsStatusTypes = [
+                {name: 'DELIVERED', value: 'Delivered'},
+                {name: 'ACCEPTED', value: 'Accepted'},
+                {name: 'PENDING', value: 'Pending'},
+                {name: 'FAILED', value: 'Failed'}
+            ];
+
+
             scope.offices = [];
             scope.clients = [];
             scope.smsTemplates = [];
             scope.submt = false;
             //scope.officeId1 = 1
             scope.formData = {};
+            scope.smsLogsFilter = {};
+            scope.formData.messageTemplate = '';
             scope.mobileNo = {};
             scope.selected = false;
             scope.client = [];
@@ -31,12 +43,45 @@
             scope.additionalNumber = '';
             scope.MobileNumbers = '';
             scope.complete1 = false;
-            scope.p = {};
-            scope.a = {};
             scope.officeId1 = $rootScope.ofId;
             scope.send = true;
+            scope.formData.startDate = new Date();
+            scope.formData.endDate = new Date();
+            scope.formData.schedule_once = true;
+            scope.userId = localStorageService.getFromLocalStorage("userData").userId;
+            scope.createNewCampaign = false;
+            scope.isFiltered = false;
+
+            scope.campaignsPerPage = 11;
+            scope.totalCampaigns = 0;
+            scope.filterText = "";
+
+            scope.messagesPerPage = 10;
+            scope.totalMessages = 0;
+
+            scope.showCreateNewCampaign = function () {
+                scope.createNewCampaign = true;
+            };
+
+
+            scope.myConfig = {
+                options: {
+                    allowMinute: false
+                }
+            };
+            scope.formData.crontabExpression = '0 0 1 * *';
+
+            scope.campaignTab = 1;
 
             scope.tab = 1;
+
+            scope.selectCampaignTab = function (setTab) {
+                scope.campaignTab = setTab;
+            };
+
+            scope.isCampaignSelected = function (checkTab) {
+                return scope.campaignTab === checkTab;
+            };
 
             scope.selectTab = function (setTab) {
                 scope.tab = setTab;
@@ -44,6 +89,18 @@
 
             scope.isSelected = function (checkTab) {
                 return scope.tab === checkTab;
+            };
+
+            scope.campaigns = [];
+            scope.getCampaignResultsPage = function (pageNumber) {
+                var startPosition = (pageNumber - 1) * scope.campaignsPerPage;
+                scope.campaigns = scope.actualCampaigns.slice(startPosition, startPosition + scope.campaignsPerPage);
+            };
+
+            scope.messages = [];
+            scope.getMessagesResultsPage = function (pageNumber) {
+                var startPosition = (pageNumber - 1) * scope.messagesPerPage;
+                scope.messages = scope.actualMessages.slice(startPosition, startPosition + scope.messagesPerPage);
             };
 
 
@@ -58,205 +115,159 @@
                 scope.smsTemplates = data;
             });
 
-            scope.addClient = function () {
-                for (var i in this.formData.id) {
-                    for (var j in scope.clients) {
-                        if (scope.clients[j].id == this.formData.id[i]) {
-                            var temp = {};
-                            temp.id = this.formData.id[i];
-                            temp.mobileNo = scope.clients[j].mobileNo;
-                            temp.displayName = scope.clients[j].displayName;
-                            temp.externalId = scope.clients[j].externalId;
-                            scope.client.push(temp);
-                            scope.clients.splice(j, 1);
-                        }
+            scope.actualCampaigns = [];
+            scope.fetchSMSCampaign = function () {
 
+                $http({
+                    method: 'GET',
+                    url: smsPath + '/campaigns',
+                    headers: {
+                        'Content-Type': 'application/json'
                     }
-                }
-
-                this.formData.id = this.formData.id - 1;
-            };
-
-            scope.removeClient = function () {
-
-                for (var i in this.formData.client) {
-                    for (var j in scope.client) {
-                        if (scope.client[j].id == this.formData.client[i]) {
-
-                            var temp = {};
-                            temp.id = this.formData.client[i];
-                            temp.displayName = scope.client[j].displayName;
-                            temp.mobileNo = scope.client[j].mobileNo;
-                            temp.externalId = scope.client[j].externalId;
-                            scope.clients.push(temp);
-                            scope.client.splice(j, 1);
-                        }
-                    }
-                }
-                this.formData.client = this.formData.client - 1;
-            };
-
-            scope.select = function () {
-                scope.selected = false;
-                scope.mobileNo = scope.formData.id;
-                scope.formData.mobileNo = scope.mobileNo;
-
-            }
-
-            scope.selectAll = function () {
-                scope.selected = false;
-                //reduce the size of clients by 1;
-                this.formData.clients = this.formData.clients - 1;
-                for (var l in scope.clients) {
-
-                    var temp = {};
-                    temp.id = scope.clients[l].id;
-                    temp.displayName = scope.clients[l].displayName;
-                    temp.mobileNo = scope.clients[l].mobileNo;
-                    temp.externalId = scope.clients[l].externalId;
-                    scope.client.push(temp);
-                }
-                //scope.client= scope.mobileNo;
-                scope.clients = [];
-
-            }
-
-            scope.clear = function () {
-                for (var l in scope.client) {
-                    var temp = {};
-                    temp.id = scope.client[l].id;
-                    temp.displayName = scope.client[l].displayName;
-                    temp.mobileNo = scope.client[l].mobileNo;
-                    temp.externalId = scope.client[l].externalId;
-                    scope.clients.push(temp);
-                }
-                scope.client = [];
-                scope.selected = false;
-                scope.formData.mobileNo = " ";
-                scope.formData.id = "";
-                //reduce the size of selected client Array
-                this.formData.client = this.formData.client - 1;
-
-                //scope.clients=scope.formData.client;
-            }
-            scope.cancle = function () {
-                //scope.selected=false;
-                scope.formData.messageText = " ";
-            }
-            var param = {};
-            scope.filterText = "";
-            param.officeId = scope.officeId1;
-            var items = resourceFactory.clientResource.getAllClients(param, function (data) {
-                scope.totalClients = data.totalFilteredRecords;
-                scope.clients = data.pageItems;
-
-            });
-
-
-            scope.fetchClientByOfficeId = function (officeId) {
-                scope.officeId1 = officeId;
-                var params = {};
-                params.officeId = officeId;
-                scope.formData.mobileNo = "";
-
-                var items = resourceFactory.clientResource.getAllClients(params, function (data) {
-                    scope.totalClients = data.totalFilteredRecords;
-                    scope.clients = data.pageItems;
-
+                }).then(function (response) {
+                    scope.totalCampaigns = response.data.pageItemsCount;
+                    scope.actualCampaigns = response.data.data;
+                    scope.getCampaignResultsPage(1);
+                    scope.isErr = false;
+                }, function (response) {
+                    scope.errorMessage = response.data.message;
+                    scope.isErr = true;
+                    // $log.error(response.data);
                 });
 
-                //scope.client = [];
             };
 
-            scope.fetchPendingSMS=function () {
+            scope.actualMessages = [];
+            scope.fetchSMSLogs = function () {
+                if (scope.smsLogsFilter.smsStatus &&
+                    scope.smsLogsFilter.fromDate &&
+                    scope.smsLogsFilter.toDate) {
+                    $http({
+                        method: 'GET',
+                        url: smsPath + '/logs/messages?smsStatus=' + scope.smsLogsFilter.smsStatus.name +
+                        '&fromDate=' + $filter('date')(scope.smsLogsFilter.fromDate, 'yyyy-MM-dd') +
+                        '&toDate=' + $filter('date')(scope.smsLogsFilter.toDate, 'yyyy-MM-dd'),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(function (response) {
+                        scope.totalMessages = response.data.pageItemsCount;
+                        scope.actualMessages = response.data.data;
+                        scope.getMessagesResultsPage(1);
+                        scope.isFiltered = true;
+                        scope.isErr = false;
+                    }, function (response) {
+                        scope.errorMessage = response.data.message;
+                        scope.isErr = true;
+                        // $log.error(response.data);
+                    });
+                } else {
+                    scope.errorMessage = 'Please select filter parameters to proceed';
+                    scope.isErr = true;
+                }
 
             };
 
-            scope.search = function () {
-                scope.clients = [];
-                scope.searchResults = [];
-                scope.filterText = "";
+            scope.addCampaignMessageVariable = function (variable) {
+                scope.formData.messageTemplate = scope.formData.messageTemplate + '{{' + variable + '}}';
+            };
 
-                resourceFactory.globalSearch.search({query: scope.searchText}, function (data) {
-                    var arrayLength = data.length;
-                    for (var i = 0; i < arrayLength; i++) {
-                        var result = data[i];
-                        var client = {};
-                        client.status = {};
-                        client.subStatus = {};
-                        client.status.value = result.entityStatus.value;
-                        client.status.code = result.entityStatus.code;
-                        if (result.entityType == 'CLIENT') {
-                            client.displayName = result.entityName;
-                            client.accountNo = result.entityAccountNo;
-                            client.id = result.entityId;
-                            client.officeName = result.parentName;
-                            client.externalId = result.entityExternalId;
-                            //mobile no. newly added
-                            client.mobileNo = result.entityMobileNo;
-                            // alert(result.externalId);
-                            scope.clients.push(client);
-                        } else if (result.entityType == 'CLIENTIDENTIFIER') {
-                            client.displayName = result.parentName;
-                            client.id = result.parentId;
-                            scope.clients.push(client);
+            scope.createSMSCampaign = function () {
+                var data = {
+                    campaign_name: scope.formData.campaignName,
+                    campaign_type: scope.formData.campaignType.id,
+                    start_date: $filter('date')(scope.formData.startDate, 'dd-MM-yyyy'),
+                    end_date: $filter('date')(scope.formData.endDate, 'dd-MM-yyyy'),
+                    cron_expression: scope.formData.crontabExpression,
+                    created_by: scope.userId,
+                    schedule_once: scope.formData.schedule_once,
+                    tenant_id: $rootScope.tenantIdentifier,
+                    campaign_criteria: scope.formData.businessRule,
+                    message_template: scope.formData.messageTemplate
+                };
+                $http({
+                    method: 'POST',
+                    url: smsPath + '/campaigns',
+                    data: data,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(function (response) {
+                    scope.pendingSMS = response.data.data;
+                    scope.isErr = false;
+                    scope.formData = {};
+                    scope.createNewCampaign = false;
+                }, function (response) {
+                    scope.errorMessage = response.data.message;
+                    scope.isErr = true;
+                    // $log.error(response.data);
+                });
+            };
+
+            scope.validateCampaignTabs = function () {
+                var isValid = false;
+                if (scope.tab == 1) {
+                    if (scope.formData.campaignName &&
+                        scope.formData.campaignType &&
+                        scope.formData.businessRule) {
+                        if (scope.formData.campaignType.id == 1) {
+                            isValid = true;
+                        } else if (scope.formData.campaignType.id == 2) {
+                            if (scope.formData.crontabExpression) {
+                                if (scope.formData.schedule_once) {
+                                    isValid = true;
+                                } else if (!scope.formData.schedule_once) {
+                                    if (scope.formData.startDate &&
+                                        scope.formData.endDate) {
+                                        isValid = true;
+                                    }
+                                }
+                            }
                         }
                     }
-                });
-
-            }
-
-
-            scope.sendMessage = function () {
-                for (var i in scope.client) {
-                    if (scope.client[i].mobileNo != null && scope.client[i].mobileNo != "") {
-                        scope.mobileNoForSending = scope.mobileNoForSending + scope.client[i].mobileNo + "-" + scope.client[i].displayName + "-" + scope.client[i].id + ",";
+                } else if (scope.tab == 2) {
+                    if (scope.formData.messageTemplate) {
+                        isValid = true;
+                    }
+                } else if (scope.tab == 3) {
+                    if (scope.formData.campaignName &&
+                        scope.formData.campaignType &&
+                        scope.formData.businessRule &&
+                        scope.formData.messageTemplate) {
+                        if (scope.formData.campaignType.id == 1) {
+                            isValid = true;
+                        } else if (scope.formData.campaignType.id == 2) {
+                            if (scope.formData.crontabExpression) {
+                                if (scope.formData.schedule_once) {
+                                    isValid = true;
+                                } else if (!scope.formData.schedule_once) {
+                                    if (scope.formData.startDate &&
+                                        scope.formData.endDate) {
+                                        isValid = true;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-                if (angular.isUndefined(scope.formData.additionalNumber) || scope.formData.additionalNumber == "") {
-                    scope.MobileNumbers = scope.mobileNoForSending.substring(0, scope.mobileNoForSending.length - 1);
-                }
-                else {
-                    scope.MobileNumbers = scope.mobileNoForSending + scope.formData.additionalNumber;
-                }
-                var params = {};
-                params.datatable = "OfficeDetails";
-                params.apptableId = scope.formData.officeId;
-                params.order = null;
-                scope.t = "";
 
-                resourceFactory.datatableResource.getsmsEnableOffice(params, function (data) {
-                    if (data[0] != null) {
-                        scope.p = data[0];
-                    }
-                    var isSendSms = scope.p.sms_enabled;
-                    if (isSendSms == 'true') {
-                        var messagejson = {};
-                        messagejson.target = scope.MobileNumbers;
-                        messagejson.type = "sms";
-                        messagejson.entity_id = scope.formData.officeId;
-                        messagejson.message = scope.formData.messageText;
-                        resourceFactory.notificationResource.post(messagejson, function (data) {
-                            //  var response=data.valueOf();
-                            scope.complete1 = true;
+                return isValid;
+            };
 
-                        });
-
-
-                    } else {
-                        scope.send = false;
-                    }
-                });
-
-                scope.mobileNoForSending = '';
-
-
-            }
         }
 
 
     });
-    mifosX.ng.application.controller('SmsCampaignController', ['$scope', 'ResourceFactory', '$location', '$rootScope', mifosX.controllers.SmsCampaignController]).run(function ($log) {
+    mifosX.ng.application.controller('SmsCampaignController', [
+        '$scope',
+        'ResourceFactory',
+        '$location',
+        '$rootScope',
+        '$http',
+        '$log',
+        'localStorageService',
+        '$filter',
+        mifosX.controllers.SmsCampaignController]).run(function ($log) {
         $log.info("SmsCampaignController initialized");
     });
 }(mifosX.controllers || {}));

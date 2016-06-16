@@ -800,7 +800,10 @@
             .when('/smscampaign', {
                 templateUrl: 'views/smscampaign/smscampaign.html'
             })
-            .when('/createsmscampaign', {
+            .when('/smscampaigndetails', {
+                templateUrl: 'views/smscampaign/createsmscampaign.html'
+            })
+            .when('/smscampaigndetails/:id', {
                 templateUrl: 'views/smscampaign/createsmscampaign.html'
             })
             .when('/createTeller', {

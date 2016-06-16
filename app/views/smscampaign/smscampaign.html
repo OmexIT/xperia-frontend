@@ -1,28 +1,454 @@
 <div class="col-md-12" ng-controller="SmsCampaignController">
     <ul class="globalnav">
-        <li><a href ng-click="" class="here">Campaign</a></li>
-        <li><a href ng-click="">Pending SMS</a></li>
-        <li><a href ng-click="">Sent SMS</a></li>
-        <li><a href ng-click="">Delivered SMS</a></li>
-        <li><a href ng-click="">Failed SMS</a></li>
+        <li><a href ng-click="selectCampaignTab(1)" ng-class="{ here:isCampaignSelected(1)}">Campaign</a></li>
+        <li><a href ng-click="selectCampaignTab(2)" ng-class="{ here:isCampaignSelected(2)}">Campaign SMS messages</a></li>
     </ul>
 
-    <div class="campaign-body">
+    <div class="campaign-body" ng-show="isCampaignSelected(1)" ng-init="fetchSMSCampaign()">
         <h1>SMS Campaign</h1>
-        <div class="pull-right">
-            <a href="#/createsmscampaign" class="btn btn-primary pull-right" has-permission='CREATE_CLIENT'>
-                <i class="icon-plus icon-white"></i>&nbsp;Create SMS Campaign</a>
+        <div class="col-md-4"  ng-show="!createNewCampaign">
+            <input ng-autofocus="true" ng-model="filterText" ng-keyup="onFilter()" type="text" class="form-control"
+                   placeholder="Enter text to filter">
         </div>
-        <div class="campaign-table">
-            <table>
+        <div class="col-md-4 pull-right">
+            <button ng-click="createNewCampaign=true" class="btn btn-primary pull-right" ng-show="!createNewCampaign">
+                <i class="icon-plus icon-white"></i>&nbsp;Create SMS Campaign
+            </button>
+            <button ng-click="createNewCampaign=false" class="btn btn-primary pull-right" ng-show="createNewCampaign">
+                <i class="icon-arrow-left icon-white"></i>&nbsp;Back to SMS Campaigns
+            </button>
+        </div>
+        <div class="campaign-table" ng-show="!createNewCampaign">
+            <table class="table">
                 <thead>
-                <tr>
+                <tr class="graybg">
+                    <th>ID</th>
+                    <th>Date Created</th>
                     <th>Campaign Name</th>
                     <th>Type</th>
                     <th>Message Template</th>
-                    <th>Submitted By</th>
-                    <th>Campaign Type</th>
-                    <th>Approved By</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Cron</th>
+                    <th>Run Once?</th>
+                </tr>
+                </thead>
+                <!--| orderBy:'id':reverse-->
+                <tbody>
+                <tr class="pointer-main pop"
+                    dir-paginate="campaign in campaigns   | filter:filterText | itemsPerPage: campaignsPerPage"
+                    total-items="totalCampaigns" pagination-id="smscampaign"
+                    ns-popover
+                    ns-popover-template="popover"
+                    ns-popover-trigger="click"
+                    ns-popover-placement="bottom"
+                    ns-popover-theme="ns-popover-tooltip-theme"
+                    ns-popover-timeout="2">
+                    <td>{{campaign.id}}</td>
+                    <td>{{campaign.date_created}}</td>
+                    <td>
+                        <a href="#/smscampaigndetails/{{payment.id}}" class="text-info" ng-click=""
+                           uib-tooltip="View Details">
+                            {{campaign.campaign_name}}
+                        </a>
+                    </td>
+                    <td>{{campaign.campaign_type}}</td>
+                    <td>{{campaign.message_template}}</td>
+                    <td>{{campaign.start_date}}</td>
+                    <td>{{campaign.end_date}}</td>
+                    <td>{{campaign.campaign_status}}</td>
+                    <td>{{campaign.cron_expression}}</td>
+                    <td>
+                        <span ng-class="{'label label-success' : campaign.schedule_once, 'label label-primary' : !campaign.schedule_once}">
+                            {{campaign.schedule_once}}
+                        </span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <dir-pagination-controls boundary-links="true" pagination-id="smscampaign"
+                                     template-url="bower_components/angular-utils-pagination/dirPagination.tpl.html"
+                                     on-page-change="getCampaignResultsPage(newPageNumber)"></dir-pagination-controls>
+        </div>
+
+        <!--=========================================================================================================================-->
+        <!--Create SMS Campaign-->
+        <!--=========================================================================================================================-->
+        <div ng-show="createNewCampaign" ng-init="selectTab(1)">
+            <div class="col-md-12">
+                <ul class="globalnav">
+                    <li><a href ng-class="{ here:isSelected(1)}">Campaign</a></li>
+                    <li><a href ng-class="{ here:isSelected(2)}" ng-disabled="campaign.$invalid">Message</a>
+                    </li>
+                    <li><a href ng-class="{ here:isSelected(3)}" ng-disabled="campaign.$invalid">Preview</a>
+                    </li>
+                </ul>
+                <div id="campaignDetails" class="campaign-body" ng-show="isSelected(1)">
+                    <h1>Create New SMS Campaign - Campaign</h1>
+
+                    <div class="col-md-12">
+                        <form class="form-horizontal" name="campaign">
+                            <div class="form-group">
+                                <label class="control-label col-sm-2" for="campaignName">Campaign Name:<span
+                                        class="required">*</span></label>
+
+                                <div class="col-sm-3">
+                                    <input type="text" id="campaignName" name="campaignName"
+                                           ng-model="formData.campaignName"
+                                           class="form-control" required/>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-sm-2" for="campaignType">Campaign Type:<span
+                                        class="required">*</span></label>
+
+                                <div class="col-sm-3">
+                                    <select id="campaignType" name="campaignType" ng-model="formData.campaignType"
+                                            ng-options="campaignType as campaignType.name for campaignType in campaignTypes"
+                                            class="form-control" required>
+                                        <option value="">-- Select Campaign Type --</option>
+                                    </select>
+
+                                </div>
+                            </div>
+
+                            <!--Campaign type params-->
+                            <div class="schedule-params" ng-show="formData.campaignType.id==2">
+                                <h1>Schedule Parameters</h1>
+                                <h2><strong>scheduled</strong> campaign</h2>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-2">Create Cron Expression:<span
+                                            class="required">*</span></label>
+                                    <div class="col-sm-10">
+                                        <cron-selection output="formData.crontabExpression" config="myConfig"
+                                                        init="formData.crontabExpression"></cron-selection>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-2" for="crontabExpression">Cron Expression:<span
+                                            class="required">*</span></label>
+
+                                    <div class="col-sm-3">
+                                        <input type="text" id="crontabExpression" name="crontabExpression"
+                                               ng-model="formData.crontabExpression"
+                                               class="form-control" readonly/>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-3">
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox" ng-model="formData.schedule_once"> Run schedule
+                                                once?
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--Show if not running once-->
+                                <div ng-show="!formData.schedule_once">
+                                    <blockquote>
+                                        <p>Select campaign duration <strong>start date</strong> to <strong>end
+                                            date</strong>
+                                        </p>
+                                    </blockquote>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-2">Start Date:<span
+                                                class="required">*</span></label>
+
+                                        <div class="col-sm-3">
+                                            <input id="startDate" type="text" name="startDate"
+                                                   datepicker-pop="dd MMMM yyyy"
+                                                   ng-model="formData.startDate" is-open="opened1" min="'2000-01-01'"
+                                                   max="restrictDate" class="form-control"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="endDate" class="control-label col-sm-2">End Date:<span
+                                                class="required">*</span></label>
+
+                                        <div class="col-sm-3">
+                                            <input id="endDate" type="text" name="endDate" datepicker-pop="dd MMMM yyyy"
+                                                   ng-model="formData.endDate" is-open="opened1" min="'2000-01-01'"
+                                                   max="restrictDate" class="form-control"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="business-rules-params">
+                                <h1>Business Rules Parameters</h1>
+
+                                <div class="form-group">
+                                    <label class="control-label col-sm-2" for="businessRule">Business Rule<span
+                                            class="required">*</span></label>
+
+                                    <div class="col-sm-3">
+                                        <select type="text" id="businessRule" name="businessRule"
+                                                ng-model="formData.businessRule"
+                                                ng-options="businessRule as businessRule.name for businessRule in businessRules"
+                                                class="form-control" required
+                                                late-Validate>
+                                            <option value="">-- Select Business Rule --</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div ng-show="formData.businessRule.id==1">
+                                    <h2>All clients with status 'Active'</h2>
+                                    <!--<div class="form-group">-->
+                                    <!--<label class="control-label col-sm-2">{{ 'label.heading.office' | translate }}:<span-->
+                                    <!--class="required">*</span></label>-->
+
+                                    <!--<div class="col-sm-3">-->
+                                    <!--<select id="officeId" ng-model="formData.officeId" class="form-control"-->
+                                    <!--ng-options="office.id as office.name for office in offices"-->
+                                    <!--value="{{office.id}}"-->
+                                    <!--required late-validate>-->
+                                    <!--<option value="">&#45;&#45; Select Office &#45;&#45;</option>-->
+                                    <!--</select>-->
+                                    <!--</div>-->
+                                    <!--</div>-->
+                                </div>
+                            </div>
+
+                            <div>
+                                <a href ng-click="selectTab(2)" class="btn btn-success" has-permission='CREATE_CLIENT'
+                                   ng-disabled="!validateCampaignTabs()">Next&nbsp;<i
+                                        class="icon-arrow-right icon-white"></i></a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="campaignMessageSection" class="campaign-body" ng-show="isSelected(2)">
+                    <h1>Create New SMS Campaign - Message</h1>
+
+                    <div class="row">
+                        <div class="col-sm-7">
+                            <div class="form-group">
+                                <label for="campaignMessage">Create message template</label>
+                    <textarea class="form-control" rows="5" id="campaignMessage"
+                              ng-model="formData.messageTemplate"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-sm-5 message-builder">
+                            <div class="col-sm-12">
+                                <h2>Message placeholders Variables</h2>
+                            </div>
+                            <div class="row">
+                                <ul>
+                                    <li><a class="col-xs-4 campaign-link"
+                                           ng-click="addCampaignMessageVariable('first_name')">First
+                                        Name</a></li>
+                                    <li><a class="col-xs-4 campaign-link"
+                                           ng-click="addCampaignMessageVariable('middle_name')">Middle
+                                        Name</a></li>
+                                    <li><a class="col-xs-4 campaign-link"
+                                           ng-click="addCampaignMessageVariable('last_name')">Last
+                                        Name</a></li>
+                                    <li><a class="col-xs-4 campaign-link"
+                                           ng-click="addCampaignMessageVariable('full_name')">Full
+                                        Name</a></li>
+                                    <li><a class="col-xs-4 campaign-link"
+                                           ng-click="addCampaignMessageVariable('mobile_number')">Mobile
+                                        Number</a></li>
+                                    <li><a class="col-xs-4 campaign-link"
+                                           ng-click="addCampaignMessageVariable('account_number')">Account
+                                        Number</a></li>
+                                    <li><a class="col-xs-4 campaign-link"
+                                           ng-click="addCampaignMessageVariable('external_id')">External
+                                        Id</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <a href ng-click="selectTab(1)" class="btn btn-primary">
+                            Back&nbsp;<i class="icon-arrow-left icon-white"></i>
+                        </a>
+                        <a href ng-click="selectTab(3)" class="btn btn-success" ng-disabled="!validateCampaignTabs()">
+                            Next&nbsp;<i class="icon-arrow-right icon-white"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="campaignReview" class="campaign-body" ng-show="isSelected(3)">
+                    <h1>Create New SMS Campaign - Review </h1>
+
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="campaignName">Campaign Name:</label>
+
+                            <div class="col-sm-3">
+                                <input type="text" name="campaignName" ng-model="formData.campaignName"
+                                       class="form-control" disabled/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="campaignTypeName">Campaign Type:</label>
+
+                            <div class="col-sm-3">
+                                <input type="text" id="campaignTypeName" name="campaignTypeName"
+                                       ng-model="formData.campaignType.name"
+                                       class="form-control" disabled/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="campaignName">Business Rule:</label>
+
+                            <div class="col-sm-3">
+                                <input type="text" name="campaignName" ng-model="formData.businessRule.name"
+                                       class="form-control" disabled/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="campaignName">Message Template:</label>
+
+                            <div class="col-sm-3">
+                   <textarea type="text" name="campaignName" ng-model="formData.messageTemplate" rows="6"
+                             class="form-control " disabled> </textarea>
+                            </div>
+                        </div>
+                        <div ng-show="formData.campaignType.id==2">
+                            <div class="form-group">
+                                <label class="control-label col-sm-2">Cron Expression:<span
+                                        class="required">*</span></label>
+
+                                <div class="col-sm-3">
+                                    <input type="text" name="crontabExpression"
+                                           ng-model="formData.crontabExpression"
+                                           class="form-control" disabled/>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-3">
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" ng-model="formData.schedule_once" disabled> Run
+                                            schedule
+                                            once?
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Show if not running once-->
+                            <div ng-show="!formData.schedule_once">
+                                <blockquote>
+                                    <p>Duration for recurring campaign - <strong>start date</strong> to <strong>end
+                                        date</strong>
+                                    </p>
+                                </blockquote>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-2">Start Date:<span
+                                            class="required">*</span></label>
+
+                                    <div class="col-sm-3">
+                                        <input type="text" name="startDate" datepicker-pop="dd MMMM yyyy"
+                                               ng-model="formData.startDate" is-open="opened1" min="'2000-01-01'"
+                                               max="restrictDate" class="form-control" disabled/>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-2">End Date:<span
+                                            class="required">*</span></label>
+
+                                    <div class="col-sm-3">
+                                        <input type="text" name="endDate" datepicker-pop="dd MMMM yyyy"
+                                               ng-model="formData.endDate" is-open="opened1" min="'2000-01-01'"
+                                               max="restrictDate" class="form-control" disabled/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="businessRule">Business Rule<span
+                                    class="required">*</span></label>
+
+                            <div class="col-sm-3">
+                                <select type="text" name="businessRule" ng-model="formData.businessRule"
+                                        ng-options="businessRule as businessRule.name for businessRule in businessRules"
+                                        class="form-control" readonly>
+                                    <option value="">-- Select Business Rule --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!--<div class="form-group">-->
+                        <!--<label class="control-label col-sm-2" for="campaignName">Total Messages:</label>-->
+
+                        <!--<div class="col-sm-3">-->
+                        <!--<input type="text" name="campaignName" ng-model="formData.totalMessages"-->
+                        <!--class="form-control" readonly/>-->
+                        <!--</div>-->
+                        <!--</div>-->
+                        <div class="col-sm-offset-2 col-sm-3">
+                            <a href ng-click="selectTab(2)" class="btn btn-primary"
+                               ng-disabled="campaign.$invalid"><i class="icon-arrow-left icon-white"></i>&nbsp;Previous</a>
+                            <a href ng-click="createSMSCampaign()" class="btn btn-success"
+                               ng-disabled="!validateCampaignTabs()"><i class="icon-save icon-white"></i>&nbsp;Save</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="campaign-body" ng-show="isCampaignSelected(2)">
+        <h1>Sent Messages</h1>
+        <div class="form-horizontal">
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="smsStatus">Message Status:<span
+                        class="required">*</span></label>
+
+                <div class="col-sm-3">
+                    <select id="smsStatus" name="smsStatus" ng-model="smsLogsFilter.smsStatus"
+                            ng-options="smsStatusType as smsStatusType.value for smsStatusType in smsStatusTypes"
+                            class="form-control" required>
+                        <option value="">-- Select Status Type --</option>
+                    </select>
+
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="fromDate" class="control-label col-sm-2">From Date:<span
+                        class="required">*</span></label>
+
+                <div class="col-sm-3">
+                    <input id="fromDate" type="text" name="fromDate" datepicker-pop="dd MMMM yyyy"
+                           ng-model="smsLogsFilter.fromDate" is-open="opened1" min="'2000-01-01'"
+                           max="restrictDate" class="form-control"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="toDate" class="control-label col-sm-2">To Date:<span
+                        class="required">*</span></label>
+
+                <div class="col-sm-3">
+                    <input id="toDate" type="text" name="toDate" datepicker-pop="dd MMMM yyyy"
+                           ng-model="smsLogsFilter.toDate" is-open="opened1" min="'2000-01-01'"
+                           max="restrictDate" class="form-control"/>
+                </div>
+            </div>
+
+            <div class="col-sm-offset-2">
+                <a href ng-click="fetchSMSLogs()" class="btn btn-primary">
+                    <i class="icon-search icon-white"></i>&nbsp;Filter</a>
+            </div>
+            <div class="alert alert-danger" role="alert" ng-show="isErr">
+                {{errorMessage}}
+            </div>
+        </div>
+        <div class="campaign-table" ng-show="isFiltered">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>Date Created</th>
+                    <th>Sent At</th>
+                    <th>Destination</th>
+                    <th>Sender</th>
+                    <th width="40%">Message</th>
                     <th>Status</th>
                     <th></th>
                 </tr>
@@ -30,21 +456,69 @@
 
                 <tbody>
                 <tr class="pointer-main"
-                    dir-paginate="client in clients | orderBy:'displayName':reverse  | filter:filterText | itemsPerPage: clientsPerPage"
-                    total-items="totalClients">
-                    <td class="pointer" data-ng-click="routeTo(client.id)">{{client.displayName}}</td>
-                    <td class="pointer" data-ng-click="routeTo(client.id)">{{client.accountNo}}</td>
-                    <td class="pointer" data-ng-click="routeTo(client.id)">{{client.externalId}}</td>
-                    <td class="pointer" data-ng-click="routeTo(client.id)">
-                        <i class="icon-stop {{client.status.code | StatusLookup}}"></i>&nbsp;{{client.status.value}}
-                        <small ng-if="client.subStatus.description">[{{client.subStatus.description}}]</small>
+                    dir-paginate="message in messages | orderBy:'date_added':reverse  | filter:filterText | itemsPerPage: messagesPerPage"
+                    total-items="totalMessages" pagination-id="smscampaignmessages">
+                    <td>{{message.date_added | date: "yyyy-MM-dd HH:mm:ss"}}</td>
+                    <td>{{message.sent_at | date: "yyyy-MM-dd HH:mm:ss"}}</td>
+                    <td>{{message.sms_to}}</td>
+                    <td>{{message.sms_from}}</td>
+                    <td>{{message.message}}</td>
+                    <td>
+                        <span ng-class="{'label label-danger' : message.request_status=='REJECTED_NOT_ENOUGH_CREDITS', 'label label-primary' : !campaign.schedule_once}">
+                            {{message.request_status}}
+                        </span>
                     </td>
-                    <td class="pointer" data-ng-click="routeTo(client.id)">{{client.officeName}}</td>
-                    <td class="pointer" data-ng-click="routeTo(client.id)">{{client.staffName}}</td>
+                    <td></td>
                 </tr>
                 </tbody>
-
             </table>
+            <dir-pagination-controls boundary-links="true" pagination-id="smscampaignmessages"
+                                     template-url="bower_components/angular-utils-pagination/dirPagination.tpl.html"
+                                     on-page-change="getMessagesResultsPage(newPageNumber)"></dir-pagination-controls>
         </div>
     </div>
+
+    <script id="template.html" type="text/ng-template">
+        <strong>HTML</strong> allowed.<br/>
+        Binding allowed: {{campaign.campaign_name}}<br/>
+        <button ng-click="value = 2">Test</button>
+    </script>
+    <script type="text/ng-template" id="popover">
+        <div class="triangle"></div>
+
+        <div class="ns-popover-tooltip">
+
+            <dl>
+                <dt>ID: </dt>
+                <dd>{{campaign.id}}</dd>
+
+                <dt>Campaign Name: </dt>
+                <dd>{{campaign.campaign_name}}</dd>
+
+                <dt>Date Created: </dt>
+                <dd>{{campaign.date_created}}</dd>
+
+                <dt>Type: </dt>
+                <dd>{{campaign.campaign_type}}</dd>
+
+                <dt>Message Template:</dt>
+                <dd>{{campaign.message_template}}</dd>
+
+                <dt>Start Date:</dt>
+                <dd>{{campaign.start_date}}</dd>
+
+                <dt>End Date:</dt>
+                <dd>{{campaign.end_date}}</dd>
+
+                <dt>Campaign Status:</dt>
+                <dd>{{campaign.campaign_status}}</dd>
+
+                <dt>Cron Expression:</dt>
+                <dd>{{campaign.cron_expression}}</dd>
+            </dl>
+
+
+        </div>
+    </script>
 </div>
+
